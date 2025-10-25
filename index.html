@@ -1,20 +1,567 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sample Page</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cinematic Cloud Transition Scroll</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@300;400;700&display=swap');
+
+/* === THEME & DIMENSIONS === */
+:root{
+  --gold-1:#fff6cf;
+  --gold-2:#f4d56a;
+  --gold-3:#d4a93c;
+  --ink:#5a2b86;
+  --ink-soft:#6b3a96;
+
+  --rodH:60px;
+  --sheetW:min(68vw,850px);
+  --sheetH:min(78vh,1080px);
+}
+
+/* === BASE === */
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;overflow:hidden;background:#000}
+::selection{background:rgba(250,224,168,.6)}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+/* === INTRO (Passphrase Gate) === */
+#intro{
+  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;text-align:center;z-index:10;transition:opacity .8s ease;
+  background:
+    radial-gradient(1400px 700px at 50% 0%, rgba(255,220,170,.25), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg,#24113f 0%, #401a72 40%, #6a0dad 100%);
+}
+#intro .gate{
+  width:min(92vw,520px);
+  background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+  backdrop-filter: blur(10px);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:18px;
+  padding:28px 22px 24px;
+  box-shadow:0 10px 60px rgba(0,0,0,.35), 0 0 40px rgba(255,220,150,.15);
+}
+#intro h1{
+  font-family:'Dancing Script',cursive;
+  font-size:2.6rem; margin:0 0 6px; color:#fff;
+  text-shadow:0 0 16px rgba(255,220,150,.55);
+}
+#intro p.sub{
+  margin:0 0 18px; color:rgba(255,255,255,.86); font-size:1.02rem;
+}
+.formRow{
+  display:flex; gap:10px; align-items:center; justify-content:center;
+}
+#passInput{
+  flex:1; min-width:0;
+  font-size:1.05rem; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.35);
+  background:rgba(0,0,0,.25); color:#fff; outline:none;
+  box-shadow:inset 0 0 0 9999px rgba(255,255,255,.04);
+}
+#passInput::placeholder{color:rgba(255,255,255,.55)}
+#unlockBtn{
+  border:0; padding:14px 18px; border-radius:12px; cursor:pointer; white-space:nowrap;
+  background:linear-gradient(90deg,var(--gold-1),var(--gold-2));
+  color:#4c1f86; font-size:1.02rem; font-weight:600;
+  box-shadow:0 0 18px rgba(255,220,150,.45);
+  transition:transform .15s ease, filter .2s ease;
+}
+#unlockBtn:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+#hint{
+  margin-top:10px; font-size:.95rem; color:#ffdca0; opacity:.9;
+}
+#error{
+  margin-top:10px; font-size:.95rem; color:#ffb3b3; opacity:0; transition:opacity .2s ease;
+}
+.shake{ animation:shake .25s linear 1; }
+@keyframes shake{
+  0%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-4px)} 100%{transform:translateX(0)}
+}
+
+/* === VIDEOS === */
+
+/* Only global base for background layers */
+#firstVideo,
+#bgVideo {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  object-position: center center;
+  background-color: #000;
+  transition: opacity 2s ease;
+  z-index: 1;
+}
+
+/* Intro (cloud) video */
+#firstVideo {
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  pointer-events: none;
+}
+
+/* Background (heaven) video */
+#bgVideo {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+/* All other inline scroll videos stay natural */
+#parchment video.mediaFrame {
+  position: static;
+  width: auto;
+  max-width: 90%;
+  max-height: 80vh;
+  object-fit: contain;
+  display: block;
+  margin: 28px auto;
+  background: #000;
+  border: 5px solid #dcbc6a;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(255,210,100,.4), 0 0 50px rgba(255,240,180,.2);
+}
+
+/* === GOLDEN VEIL (3s sweep left→right, fades out) === */
+#goldVeil{
+  position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;
+  background:
+    linear-gradient( to bottom, rgba(255,225,160,.85), rgba(255,205,120,.75), rgba(255,225,160,.85) ),
+    linear-gradient( 90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,245,200,.85) 8%,
+      rgba(255,250,220,1) 12%,
+      rgba(255,235,170,.85) 16%,
+      rgba(255,255,255,0) 24% );
+  background-size: 100% 100%, 300% 100%;
+  background-position: center center, -50% 0%;
+  filter: saturate(1.05) brightness(1.02);
+}
+.veil-show{ animation: veilSweep 3s ease-out forwards; }
+@keyframes veilSweep{
+  0%{opacity:1; background-position:center center, -60% 0%;}
+  60%{opacity:.9; background-position:center center, 40% 0%;}
+  100%{opacity:0; background-position:center center, 120% 0%;}
+}
+
+/* === BLACK FADE === */
+#blackout{
+  position:fixed; inset:0; background:#000; z-index:7; opacity:0; transition:opacity 2s ease;
+  pointer-events:none;
+}
+
+/* === SCROLL SCENE === */
+#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;perspective:1700px;z-index:3;}
+#scrollRig{
+  position:relative;width:var(--sheetW);margin:0 auto;
+  height:calc(var(--rodH) + var(--sheetH) + var(--rodH));
+  transform-style:preserve-3d;
+}
+
+/* RODS */
+#scrollTop,#scrollBottom{
+  position:absolute;left:50%;
+  width:calc(var(--sheetW) + 160px);
+  height:var(--rodH);
+  border-radius:999px;
+  background:
+    radial-gradient(65% 140% at 50% -30%, #ffffff 0%, transparent 60%),
+    linear-gradient(180deg, var(--gold-1) 0%, var(--gold-2) 40%, var(--gold-3) 80%, #fff0b6 100%);
+  box-shadow:
+    0 0 38px 10px rgba(255,220,150,.55),
+    inset 0 0 18px rgba(255,255,255,.9);
+  transform:translateX(-50%);opacity:0;z-index:4;
+}
+#scrollTop{top:0;}
+#scrollTop::before,#scrollTop::after,
+#scrollBottom::before,#scrollBottom::after{
+  content:""; position:absolute; top:-2px;
+  width:var(--rodH); height:calc(var(--rodH) + 4px);
+  border-radius:50%;
+  background:radial-gradient(circle at 38% 38%, #fff, #f5e0a8 55%, #bd8f36 100%);
+  box-shadow:inset 0 0 12px rgba(0,0,0,.28), 0 0 18px rgba(255,220,150,.6);
+}
+#scrollTop::before{ left:-18px; }  #scrollTop::after{ right:-18px; }
+#scrollBottom{transform:translateX(-50%) translateY(0);}
+#scrollBottom::before{ left:-18px; } #scrollBottom::after{ right:-18px; }
+
+/* PARCHMENT (scroll container) */
+#parchmentWrap{
+  position:absolute;left:50%;top:calc(var(--rodH) - 25px);
+  transform:translateX(-50%);width:var(--sheetW);height:var(--sheetH);
+}
+#parchment{
+  position:absolute;top:0;left:0;width:100%;height:0;
+  overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain;
+  border-left:22px solid #dcbc6a;border-right:22px solid #dcbc6a;border-radius:22px;
+  background:linear-gradient(to bottom,#fffdf6 0%,#fff7e6 45%,#fbe9bf 100%);
+  box-shadow:0 0 90px 36px rgba(255,230,170,.9),0 0 120px rgba(255,200,120,.5),inset 0 0 36px rgba(255,255,255,.6);
+  color:var(--ink);text-align:left;padding:0 26px;opacity:0;transform-origin:top center;
+  animation:parchmentAura 6s ease-in-out infinite alternate paused;
+}
+.opened #parchment{
+  height:var(--sheetH);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+#parchment .pad{padding:48px 10px 60px; max-width:min(64ch, 92%); margin:0 auto;}
+#parchment h2{
+  margin:0 0 12px;
+  font-family:'Playfair Display', serif;
+  font-weight:600;font-size:2rem;color:#5a2b86;text-align:center;
+  text-shadow:0 0 10px rgba(255,230,170,.5);
+  opacity:0;
+}
+#parchment p{
+  margin:14px 0;font-family:'Merriweather',serif;font-weight:400;
+  font-size:1.03rem;line-height:1.75;color:#49256f;opacity:0;word-break:break-word;
+}
+
+/* AURA */
+@keyframes parchmentAura{
+  0%  { box-shadow: 0 0 88px 36px rgba(255,230,170,.8), 0 0 130px rgba(255,195,110,.45), inset 0 0 28px rgba(255,255,255,.55); }
+  100%{ box-shadow: 0 0 112px 52px rgba(255,240,180,.95), 0 0 160px rgba(255,210,140,.65), inset 0 0 34px rgba(255,255,255,.7); }
+}
+
+/* ANIMATIONS */
+@keyframes flyInRod{0%{transform:translateX(-50%) translateZ(-900px) scale(.25);opacity:0;}60%{transform:translateX(-50%) translateZ(-200px) scale(.8);opacity:1;}100%{transform:translateX(-50%) translateZ(80px) scale(1);opacity:1;}}
+@keyframes unrollDown{0%{height:0;opacity:0;}100%{height:var(--sheetH);opacity:1;}}
+@keyframes bottomRide{0%{transform:translateX(-50%) translateY(0);opacity:0;}100%{transform:translateX(-50%) translateY(var(--sheetH));opacity:1;}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.ready #scrollTop{animation:flyInRod 1.6s ease-out forwards;}
+.unrolling #parchment{animation:unrollDown 2.6s cubic-bezier(.22,.7,.1,1) forwards;}
+.unrolling #scrollBottom{animation:bottomRide 2.6s cubic-bezier(.22,.7,.1,1) forwards;}
+.opened #parchment{animation-play-state:running;}
+
+.hidden{display:none!important;}
+
+/* === HIDE SCROLLBAR === */
+#parchment::-webkit-scrollbar { width: 0px; }
+#parchment { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* === MEDIA (frames + spacing, natural ratios) === */
+.mediaFrame{
+  display:block;
+  margin: 28px auto;                   /* generous vertical space */
+  border: 5px solid #dcbc6a;           /* golden frame */
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(255,210,100,.4), 0 0 50px rgba(255,240,180,.2);
+  max-width: 90%;
+  height: auto;
+  animation: fadeIn 1.2s ease forwards;
+}
+video.mediaFrame{
+  background:#000;
+  object-fit: contain;                 /* keep natural aspect ratio */
+  width: auto;                         /* do NOT force full width */
+  max-width: 90%;
+  max-height: 80vh;
+}
+img.mediaFrame{
+  width: auto;                         /* keep natural aspect ratio */
+  max-width: 90%;
+  height: auto;
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Hello there 👋</h1>
-    <p>This is a sample webpage hosted on GitHub Pages!</p>
-    <p>Once you see this online, you’re ready to create your custom page.</p>
-    <button onclick="showMessage()">Click me</button>
-    <p id="message"></p>
-  </div>
 
-  <script src="script.js"></script>
+<!-- INTRO: passphrase form -->
+<section id="intro">
+  <div class="gate">
+    <h1>A Magical Surprise</h1>
+    <p class="sub">Enter the secret word to unlock.</p>
+    <form id="startForm" class="formRow" autocomplete="off">
+      <input id="passInput" type="text" inputmode="latin-name" placeholder="Enter passphrase" aria-label="Passphrase" />
+      <button id="unlockBtn" type="submit">Unlock</button>
+    </form>
+    <div id="hint">Hint: it’s my last name.</div>
+    <div id="error">That didn’t match. Try again.</div>
+  </div>
+</section>
+
+<!-- GOLDEN GLOW VEIL FOR PINK CLOUDS INTRO -->
+<div id="goldVeil"></div>
+
+<!-- PINK CLOUDS VIDEO (10s) -->
+<video id="firstVideo" muted playsinline preload="auto">
+  <source src="first-video.mp4" type="video/mp4" />
+</video>
+
+<!-- BLACKOUT (2s) -->
+<div id="blackout"></div>
+
+<!-- HEAVEN VIDEO -->
+<video id="bgVideo" autoplay muted loop playsinline>
+  <source src="bg-video.mp4" type="video/mp4" />
+</video>
+
+<!-- SCROLL SCENE -->
+<section id="scene">
+  <div id="scrollRig">
+    <div id="scrollTop"></div>
+    <div id="parchmentWrap">
+      <div id="parchment">
+        <div class="pad">
+          <h2>Hey Ifrah,</h2>
+          <p></p>
+          <p>The last time we met, I had a lot of stuff in my heart. I had a lot to say, but I couldn't. Partly because of my fault, sure, but mainly because of the circumstances.</p>
+          <p>Before we left, I agreed to not make contact until you text me first to share how you feel. When I got home, I realized I couldn't really say much, even more so after I texted you later that night; which you read 5 days later. </p>
+          <p>While I whole-heartedly wished for a positive response from you, part of me wanted you not read it until I could do this. I just wanted to be able to do this before you text me back and tell me you're still not convinced.</p>
+          <p> But my fear turned into confusion when you never reached back out. I don't know what happened but I hope it turns out to be something good, something comforting. Hope is all I have, hope is all I've had for months, for well over a year in fact.</p>
+          <p><br>...<br></p>
+          <p><br>About this tiny, little gift. It isn't to buy your apology. You see I am an overthinker. I don't believe in building relationships on material things. Not even with you, despite all the trust I have in you and knowing you're not materialistic. I'm very strong on that. At first I thought gifting you something to get out of this would be very bad, for us, and for everything between us.</p>
+          <p>But this idea occurred to me the day after we met in college. I realized that this specific small, little gift, coming from me, in these circumstances, would mean something different. It wouldn't mean that this is all it takes, and it wouldn't mean that when it comes to effort this is all I can do. It's to show you I care about you and what you like. </p>
+          <p><br>Par phir bhi, agar mei kamyaab hojaaun, to mei kiya sochunga baad mei ke iss gift se theek hua sab?</p>
+          <p><br>Then... I recalled how your eyes got wet the last time. You say you don't care and I've been hearing that for a long time now, I'm used to it. </p>
+          <p>Yet I saw the way you were sitting with me at Scarborough Bluffs. You looked like the same angel I've always wanted to hold in arms, pick up, hide within myself and protect, love, and caress for the rest of my life.</p>
+
+          <p> (Ignore me pls)</p>
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="hug.mp4" type="video/mp4"></video>
+          
+          <p> Phir mujhe samajh aayi ke I have to do this.</p>
+          <p> Because now...</p>
+
+          <p>Now you might believe me when I tell you what I've told you before: my only way of knowing what to give you is to see you like or dislike something.</p>
+          <p> Cheezon ke mutalliq mere opinions aap se form hotey hain. You have taught me this stuff, and I try my best to learn all the time. Perhaps now you'll believe me when I say I genuinely fail to comprehend what something is worth, how much you like it, and if it would be fitting for the occasion.</p>
+          <p>Maybe now you'll trust me when I say "I have no idea" how good something looks. You might say a $20, $200, and a $2,000 diamond/jewelry item looks good. But I have no way of knowing "how" good it looks. Like idk what if I buy a $500 bracelet but it doesn't look as good to you as a $500 bracelet should. Maybe it only looks as good as a $150 bracelet. Do you get the point? Do you know what I mean? This is why I've tried to put my humble effort in other things more, that require more of my own indulgement and love. The little things.</p>
+          <p>Having observed you for so long, I'm pretty sure I'm at a point now where I can comfortably decide what to get as a gift for other people in my life, thanks to you. But when it comes to you, I have genuinely always wanted to give you the world, that's my life-long dream. So when it comes to the tiny little things, I try and do what I can, but I simply cannot wrap my head around what you would and wouldn't like.</p>
+          <p>But I try. I do. Which is why it hurt when you said all that over the phone when I was in Bahawalpur because I thought you meant I was miserly (kanjoos, lol). When I tried to convince you later, it got even worse. I wasn't trying to say "Hey, look, I spend so much on you/us." No, God, no. I just wanted to remind you that when I did sort of "gift" you those tiny little things, I did that because you had selected them, so you obviously liked them. I couldn't have done that.</p>
+          <p>On top of that, those were items I've been wishing to see you in for a long, long, long time. So it was PERFECT. That's why I paid for it. It wasn't much, it was barely anything. But I would've felt something different when I would see you in that knowing I got you this.</p>
+          <p><br>That's all I wanted to say, but it went the wrong way. Sorry about that.</p>
+          <p>I mean look at yourself in this red top and skirt:</p>
+
+          <!-- skirt.jpeg BELOW "red top and skirt" -->
+          <img src="skirt.jpeg" class="mediaFrame" alt="Skirt">
+
+          <p>How could I resist the urge to see you in this?</p>
+
+          <p><p><br>...<br></p>
+
+          <p><br>About the convocation, I agree I was late. To be honest, I might have even forgotten for a bit. But I assure you, I was very, very happy for you in that moment. It was one of those hundreds of thousands of moments where I would have loved for you to come running to me and give me a tight hug with your red robe on, and a degree in your hand.</p>
+
+          <p>In very simple words, it just didn't feel right to wish you earlier when you got there. Aap hain, sarr se to nahi utaarunga na.</p>
+
+          <p>To be honest, I wholeheartedly meant it when I asked you out on a date in that dress. You know how much I love seeing you in dresses. Don't believe me? Check this out.</p>
+
+          <!-- Grey dress images BELOW "insert grey dress pictures" -->
+          <img src="IMG_3373.png" class="mediaFrame" alt="Grey Dress 1">
+          <img src="IMG_3374.png" class="mediaFrame" alt="Grey Dress 2">
+
+          <p>Now about the convocation, look at yourself.</p>
+
+          <p>WOW!!!</p>
+
+          <!-- Convocation video BELOW "!WOW!" -->
+          <video class="mediaFrame" controls preload="metadata" playsinline>
+            <source src="convocation.mp4" type="video/mp4">
+          </video>
+
+          <p>Uss ke baad, mei apko naraaz hone pe nahi daant raha tha. I just wanted to make sure ke meri iss khachh maarney se agar aap ka dil dukha hai to aap uss ko bhulaa ke apna din behtareen guzaarein. It was your day and I didn't want to ruin it. I wanted to keep the explanations and apologies for later. The intention was ke aap ko pata ho what happened and that I'm sorry but I'll explain again when you have time. Mei nahi chaahta tha uss din jab bhi phone kholein wohi cheez yaad aaye, or saamney heavy messages baras rahey hon, lol.</p>
+
+          <p>Sorry yaar...</p>
+
+          <p><p><br>...<br></p>
+
+          <p><br>Anginnat martaba wohi pictures, videos, snaps repeat pe dekh chuka hun. Hafton se, mahenoon se, dekh raha hun. Kuch dekhtey hue to saal se zyaada hogya. Bohot yaad aa rahi hain. And this took so long to arrange, shoes bohot deir se aaye hain. Har zamaaney  ki memories mei gumm rehta hun.</p>
+
+          <p>Yeh pictures to wo hain jo mere phone ki memories mei aaye din aankhon ke saamney rehti hain. You looked majestic in that dress you wore to Wonderland.</p>
+          
+          <p>You always do.</p>
+
+          <!-- Images + many videos BELOW the "Har timeline..." paragraph -->
+          <img src="snow.jpeg" class="mediaFrame" alt="Snow">
+          <img src="wonderland.jpeg" class="mediaFrame" alt="Wonderland">
+          <img src="wonderland-2.jpeg" class="mediaFrame" alt="Wonderland 2">
+          <img src="niagara.jpeg" class="mediaFrame" alt="Wonderland 2">
+
+          <p><br>My precious memories...</p>
+
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="park.mp4" type="video/mp4"></video>
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="college.mp4" type="video/mp4"></video>
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="mirror.mp4" type="video/mp4"></video>
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="d-spot.mp4" type="video/mp4"></video>
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="red-top.mp4" type="video/mp4"></video>
+          
+          <P><br>Yeah, you did win at bowling that day. Rare loss for me. I'll get you back soon.</P>
+
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="bowling-1.mp4" type="video/mp4"></video>
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="bowling-2.mp4" type="video/mp4"></video>
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="bowling-3.mp4" type="video/mp4"></video>
+          <video class="mediaFrame" controls preload="metadata" playsinline><source src="bowling-4.mp4" type="video/mp4"></video>
+
+          <p>I'm not perfect, Ifrah. Never was, and certainly never will be. What I can promise you is my undying persistence to be the best version of myself for you.</p>
+
+          <p>I remember what you've done for me. What I was when we first met, and how you helped me stand back up. You were there for me since before our relationship ever started. You helped me grow mentally.</p>
+
+          <p>People have come into my life and left, I'm not saying it was the easiest thing in the world but I am capable of that. However, when it comes to you, I refuse to give up in the face of the world.</p>
+
+          <p>You are the one person I just cannot and will not lose. Which is why I have been the way I have been all this time. I've irritated, bothered, upset, annoyed, and frustrated you at times, but it was always worth it when I am finally able to explain everything, apologize, and see that pretty smile on your face.</p>
+
+          <p>But I can't see you hate me. So this seemed like the best way to reach out while making sure I was able to say everything I want.</p>
+
+          <p>I meant every word I ever said. I made solid commitments to you and to myself many times over these years. I just can NEVER forget the night of Feb 14th, 2023. The most beautiful being in the world sitting on my lap, a few tears escaping here perfectly carved eyes, rolling down her gorgeous face, while she says something along the lines of "I'm happy you're in my life. Thank you for being here." My heart cracked open that day, you ventured in, and closed it from within. You became permanent that day. One of many times, before and since. </p>
+
+          <!-- v-day video BELOW "one of many times, before and since." -->
+          <video class="mediaFrame" controls preload="metadata" playsinline>
+            <source src="v-day.mp4" type="video/mp4">
+          </video>
+
+          <p>Everyone deserves one person in their lives that will never give up on them, never accept to lose them. I will be that person for you, now and forever. I will never be okay with losing you. I can't give up on you, and I never will. </p>
+
+          <p>You are the greatest thing to have ever happened to me. There isn't a future I foresee without you in the main frame.</p>
+
+          <p>Life is very short. I won't lose you to these things. I know they're not tiny for you, but they are tiny when it comes to losing you over them. Nothing is big enough. Because I simply refuse to lose you. </p>
+
+          <p>You are an angel to me. I see you as a baby to caress, as a butterfly to protect, as an aurora to admire. </p>
+
+          <!-- Sunkissed images ABOVE that line were requested; placing them immediately BEFORE it would change text order.
+               So we insert them RIGHT AFTER while keeping your text intact visually in sequence. -->
+          <img src="sunkissed-1.jpeg" class="mediaFrame" alt="Sunkissed 1">
+          <img src="sunkissed-2.jpeg" class="mediaFrame" alt="Sunkissed 2">
+          <img src="sunkissed-3.jpeg" class="mediaFrame" alt="Sunkissed 3">
+
+          <p>No one could ever get what I feel in this video:</p>
+
+          <!-- hand-face video BELOW that sentence -->
+          <video class="mediaFrame" controls preload="metadata" playsinline>
+            <source src="hand-face.mp4" type="video/mp4">
+          </video>
+
+          <p>I could never hurt you on purpose, but I definitely do make mistakes. Lots of them.</p>
+          
+          <p>I lose sleep every morning when I wake up and realize you were a dream. I try and go back to sleep, so I can see you and be with you again but by that time the heartache has already kicked in.</p>
+
+          <p>I eagerly check my phone, hoping to wake up to a text or a call from you. It gets worse. Then I spend the day checking you stories, thinking about you, missing you like hell. Keeps getting worse and worse. I imagine you in various scenarios and doze off with a heavy heart. I dream of you again if I'm lucky.</p>
+
+          <p>And it goes on... and on... and on...</p>
+
+          <p>I look for your license plate in every white Prius...</p>
+
+          <p>I miss the way you used to bite me. I miss everything.</p>
+          
+          <p><p><br>...<br></p>
+
+          <p><br>This is the best thing I've ever made. It's not the best thing ever made in the world FOR SURE, and it's definitely not the best thing anyone has ever given someone. </p>
+          
+          <p>It's not the best thing I'll ever give you and it's probably not the best thing you've ever seen either. </p>
+          
+          <p>But I gave it my absolute best, I really did. I made it with all my heart. Everything I could think of, I put into it.</p>
+
+          <p>I've put everything I had into US, and I've given every last ounce of myself and all I have into this box you have infront of you.</p>
+
+          <p>I hope I succeeded, and in that hope I will be at Polson Pier tomorrow night (Sunday), Oct 6th, 2025, from 10:30 PM - 12:30 AM.</p>
+
+          <p>Or agar abhi bhi koi gila shikwa ya gussa baaki ho, to aa ke utaar lein or mujhe mera sakoon lauta dein. Hit me slap me kick me punch me. Apni bharaas nikaalein or mere galey lagg ke mujhe mera sakoon lauta dein. </p>
+
+          <p>Intezaar rahega...</p>
+
+
+          <p><br> - N. M. </p>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="scrollBottom"></div>
+  </div>
+</section>
+
+<script>
+(function(){
+  // --- timing constants ---
+  const FIRST_VIDEO_MS = 10000;      // pink clouds video length
+  const BLACKOUT_MS = 2000;          // fade to black duration
+  const EXTRA_DELAY_AFTER_BG = 3000; // delay before scroll starts after bg video appears
+
+  const intro=document.getElementById('intro');
+  const startForm=document.getElementById('startForm');
+  const passInput=document.getElementById('passInput');
+  const err=document.getElementById('error');
+
+  const goldVeil=document.getElementById('goldVeil');
+  const firstVideo=document.getElementById('firstVideo');
+  const blackout=document.getElementById('blackout');
+  const bgVideo=document.getElementById('bgVideo');
+
+  const rig=document.getElementById('scrollRig');
+  const parchment=document.getElementById('parchment');
+  const scrollBottom=document.getElementById('scrollBottom');
+  const h2=parchment.querySelector('h2');
+  const paras=parchment.querySelectorAll('p');
+
+  function startExperience(){
+    // hide gate
+    intro.style.opacity='0';
+    setTimeout(()=>intro.classList.add('hidden'),800);
+
+    // pink clouds + veil
+    firstVideo.style.opacity='1';
+    firstVideo.play().catch(()=>{});
+    goldVeil.classList.add('veil-show');
+
+    // 10s later: blackout, switch to bg video, then unroll
+    setTimeout(()=>{
+      blackout.style.opacity='1';
+      setTimeout(()=>{
+        blackout.style.opacity='0';
+        firstVideo.style.opacity='0';
+        bgVideo.style.opacity='1';
+
+        setTimeout(()=>{
+          rig.classList.add('ready'); // top rod flies in
+          setTimeout(()=>{
+            rig.classList.add('unrolling'); // parchment grows + bottom rod rides
+            setTimeout(()=>{
+              rig.classList.add('opened'); // aura loop
+              parchment.style.opacity='1';
+              // keep scroll active
+              parchment.style.height='var(--sheetH)';
+              parchment.style.overflowY='auto';
+              // fade in text
+              h2.style.animation='fadeIn 1100ms ease forwards';
+              let delay=350;
+              paras.forEach(p=>{
+                p.style.animation=`fadeIn 1100ms ease forwards`;
+                p.style.animationDelay=`${delay}ms`;
+                delay+=250;
+              });
+              // bottom rod toggle at end
+              parchment.addEventListener('scroll',()=>{
+                const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
+                scrollBottom.style.opacity = nearBottom ? '1' : '0';
+              });
+            },2700);
+          },1700);
+        },EXTRA_DELAY_AFTER_BG);
+      }, BLACKOUT_MS);
+    }, FIRST_VIDEO_MS);
+  }
+
+  startForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const val = (passInput.value || '').trim().toLowerCase();
+    if(val === 'malik'){
+      err.style.opacity = 0;
+      startExperience();
+    }else{
+      err.style.opacity = 1;
+      startForm.classList.add('shake');
+      setTimeout(()=>startForm.classList.remove('shake'), 280);
+      passInput.focus();
+      passInput.select();
+    }
+  });
+})();
+</script>
 </body>
 </html>
