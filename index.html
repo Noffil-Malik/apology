@@ -478,103 +478,150 @@ img.mediaFrame{
 
 <script>
 (function(){
-  const FIRST_VIDEO_MS = 10000;
-  const BLACKOUT_MS = 2000;
-  const EXTRA_DELAY_AFTER_BG = 3000;
+  // elements
+  const intro       = document.getElementById('intro');
+  const startForm   = document.getElementById('startForm');
+  const passInput   = document.getElementById('passInput');
+  const err         = document.getElementById('error');
 
-  const intro = document.getElementById('intro');
-  const startForm = document.getElementById('startForm');
-  const passInput = document.getElementById('passInput');
-  const err = document.getElementById('error');
+  const goldVeil    = document.getElementById('goldVeil');
+  const firstVideo  = document.getElementById('firstVideo'); // clouds intro
+  const blackout    = document.getElementById('blackout');
+  const bgVideo     = document.getElementById('bgVideo');    // heaven loop
 
-  const goldVeil = document.getElementById('goldVeil');
-  const firstVideo = document.getElementById('firstVideo');
-  const blackout = document.getElementById('blackout');
-  const bgVideo = document.getElementById('bgVideo');
+  const rig         = document.getElementById('scrollRig');
+  const parchment   = document.getElementById('parchment');
+  const scrollBottom= document.getElementById('scrollBottom');
+  const h2          = parchment.querySelector('h2');
+  const paras       = parchment.querySelectorAll('p');
 
-  const rig = document.getElementById('scrollRig');
-  const parchment = document.getElementById('parchment');
-  const scrollBottom = document.getElementById('scrollBottom');
-  const h2 = parchment.querySelector('h2');
-  const paras = parchment.querySelectorAll('p');
+  // --- helpers ---
+  function ensureInlineAutoplay(video){
+    if(!video) return;
+    video.setAttribute('playsinline','');
+    video.setAttribute('webkit-playsinline','');
+    video.muted = true; // required for autoplay on iOS
+    video.preload = video.preload || 'auto';
+    video.load();
+  }
 
-  function safelyPlay(video) {
-    if (!video) return;
-    video.muted = true;
-    video.playsInline = true;
+  function tryPlay(video){
     const p = video.play();
-    if (p !== undefined) {
-      p.catch(err => console.warn("Autoplay blocked:", err));
+    if (p && typeof p.catch === 'function') {
+      p.catch(()=> {
+        // retry once shortly after; iOS sometimes needs a tick
+        setTimeout(()=> video.play().catch(()=>{}), 60);
+      });
     }
   }
 
+  function fadeIn(el, durMs=1500){ el.style.transition = `opacity ${durMs}ms ease`; el.style.opacity = '1'; }
+  function fadeOut(el, durMs=1500){ el.style.transition = `opacity ${durMs}ms ease`; el.style.opacity = '0'; }
+
+  // --- main sequence ---
   function startExperience(){
-    intro.style.opacity='0';
-    setTimeout(()=>intro.classList.add('hidden'),800);
+    // hide gate
+    intro.style.opacity = '0';
+    setTimeout(()=> intro.classList.add('hidden'), 800);
 
-    safelyPlay(firstVideo);
-    firstVideo.style.opacity='1';
-    goldVeil.classList.add('veil-show');
+    // prepare both videos for iOS
+    ensureInlineAutoplay(firstVideo);
+    ensureInlineAutoplay(bgVideo);
 
-    setTimeout(()=>{
-      blackout.style.opacity='1';
+    // start first (clouds) video when metadata is ready (more reliable than timers)
+    const startFirst = ()=> {
+      goldVeil.classList.add('veil-show');
+      fadeIn(firstVideo, 1200);
+      tryPlay(firstVideo);
+    };
+    if (firstVideo.readyState >= 1) startFirst();
+    else firstVideo.addEventListener('loadeddata', startFirst, { once:true });
+
+    // when first video ends, blackout & switch to bg
+    const proceedToBg = ()=>{
+      // guard: avoid double-run
+      firstVideo.removeEventListener('ended', proceedToBg);
+      fadeIn(blackout, 800);
       setTimeout(()=>{
-        blackout.style.opacity='0';
-        firstVideo.style.opacity='0';
+        fadeOut(firstVideo, 400);
+        // prepare heaven video, then reveal it
+        const showBg = ()=>{
+          fadeOut(blackout, 800);
+          fadeIn(bgVideo, 1200);
+          tryPlay(bgVideo);
 
-        // SAFARI FIX: ensure bg video replays after transition
-        safelyPlay(bgVideo);
-        bgVideo.style.opacity='1';
+          // after bg is visible, run scroll sequence
+          openScroll();
+        };
+        // start bg when it's at least loadable
+        if (bgVideo.readyState >= 1) showBg();
+        else {
+          bgVideo.addEventListener('loadeddata', showBg, { once:true });
+          tryPlay(bgVideo); // kick it anyway
+        }
+      }, 600);
+    };
 
-        setTimeout(()=>{
-          rig.classList.add('ready');
-          setTimeout(()=>{
-            rig.classList.add('unrolling');
-            setTimeout(()=>{
-              rig.classList.add('opened');
-              parchment.style.opacity='1';
-              parchment.style.height='var(--sheetH)';
-              parchment.style.overflowY='auto';
-              parchment.style.webkitOverflowScrolling = 'touch';
-              parchment.style.overscrollBehavior = 'contain';
-
-              // fade in text
-              h2.style.animation='fadeIn 1100ms ease forwards';
-              let delay=350;
-              paras.forEach(p=>{
-                p.style.animation=`fadeIn 1100ms ease forwards`;
-                p.style.animationDelay=`${delay}ms`;
-                delay+=250;
-              });
-
-              // scroll bottom toggle
-              parchment.addEventListener('scroll',()=>{
-                const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
-                scrollBottom.style.opacity = nearBottom ? '1' : '0';
-              });
-            },2700);
-          },1700);
-        },EXTRA_DELAY_AFTER_BG);
-      }, BLACKOUT_MS);
-    }, FIRST_VIDEO_MS);
+    // proceed when the first video actually ends; also add a hard fallback in case file is short/loopless
+    firstVideo.addEventListener('ended', proceedToBg, { once:true });
+    setTimeout(()=> { if (!bgVideo.style.opacity || bgVideo.style.opacity==='0') proceedToBg(); }, 14000); // fallback
   }
 
-  startForm.addEventListener('submit',(e)=>{
+  function openScroll(){
+    rig.classList.add('ready');
+    setTimeout(()=>{
+      rig.classList.add('unrolling');
+      setTimeout(()=>{
+        rig.classList.add('opened');
+        parchment.style.opacity='1';
+        parchment.style.height='var(--sheetH)';
+        parchment.style.overflowY='auto';
+        parchment.style.webkitOverflowScrolling='touch';
+        parchment.style.overscrollBehavior='contain';
+
+        // fade in text
+        h2.style.animation='fadeIn 1100ms ease forwards';
+        let delay=350;
+        paras.forEach(p=>{
+          p.style.animation='fadeIn 1100ms ease forwards';
+          p.style.animationDelay=`${delay}ms`;
+          delay+=250;
+        });
+
+        // bottom rod visibility near end
+        parchment.addEventListener('scroll', ()=>{
+          const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
+          scrollBottom.style.opacity = nearBottom ? '1' : '0';
+        });
+      }, 2700);
+    }, 1700);
+  }
+
+  // iOS: if the page was backgrounded during video changes, resume background loop
+  document.addEventListener('visibilitychange', ()=>{
+    if (!document.hidden && bgVideo && bgVideo.style.opacity === '1') {
+      tryPlay(bgVideo);
+    }
+  });
+
+  // passphrase gate
+  startForm.addEventListener('submit', (e)=>{
     e.preventDefault();
-    const val=(passInput.value||'').trim().toLowerCase();
-    if(val==='malik'){
-      err.style.opacity=0;
+    const val = (passInput.value||'').trim().toLowerCase();
+    if (val === 'malik') {
+      err.style.opacity = 0;
       startExperience();
     } else {
-      err.style.opacity=1;
+      err.style.opacity = 1;
       startForm.classList.add('shake');
-      setTimeout(()=>startForm.classList.remove('shake'),280);
+      setTimeout(()=> startForm.classList.remove('shake'), 280);
       passInput.focus();
       passInput.select();
     }
   });
 })();
 </script>
+
 
 </body>
 </html>
