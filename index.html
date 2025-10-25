@@ -478,55 +478,66 @@ img.mediaFrame{
 
 <script>
 (function(){
-  // --- timing constants ---
-  const FIRST_VIDEO_MS = 10000;      // pink clouds video length
-  const BLACKOUT_MS = 2000;          // fade to black duration
-  const EXTRA_DELAY_AFTER_BG = 3000; // delay before scroll starts after bg video appears
+  const FIRST_VIDEO_MS = 10000;
+  const BLACKOUT_MS = 2000;
+  const EXTRA_DELAY_AFTER_BG = 3000;
 
-  const intro=document.getElementById('intro');
-  const startForm=document.getElementById('startForm');
-  const passInput=document.getElementById('passInput');
-  const err=document.getElementById('error');
+  const intro = document.getElementById('intro');
+  const startForm = document.getElementById('startForm');
+  const passInput = document.getElementById('passInput');
+  const err = document.getElementById('error');
 
-  const goldVeil=document.getElementById('goldVeil');
-  const firstVideo=document.getElementById('firstVideo');
-  const blackout=document.getElementById('blackout');
-  const bgVideo=document.getElementById('bgVideo');
+  const goldVeil = document.getElementById('goldVeil');
+  const firstVideo = document.getElementById('firstVideo');
+  const blackout = document.getElementById('blackout');
+  const bgVideo = document.getElementById('bgVideo');
 
-  const rig=document.getElementById('scrollRig');
-  const parchment=document.getElementById('parchment');
-  const scrollBottom=document.getElementById('scrollBottom');
-  const h2=parchment.querySelector('h2');
-  const paras=parchment.querySelectorAll('p');
+  const rig = document.getElementById('scrollRig');
+  const parchment = document.getElementById('parchment');
+  const scrollBottom = document.getElementById('scrollBottom');
+  const h2 = parchment.querySelector('h2');
+  const paras = parchment.querySelectorAll('p');
+
+  function safelyPlay(video) {
+    if (!video) return;
+    video.muted = true;
+    video.playsInline = true;
+    const p = video.play();
+    if (p !== undefined) {
+      p.catch(err => console.warn("Autoplay blocked:", err));
+    }
+  }
 
   function startExperience(){
-    // hide gate
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
 
-    // pink clouds + veil
+    safelyPlay(firstVideo);
     firstVideo.style.opacity='1';
-    firstVideo.play().catch(()=>{});
     goldVeil.classList.add('veil-show');
 
-    // 10s later: blackout, switch to bg video, then unroll
     setTimeout(()=>{
       blackout.style.opacity='1';
       setTimeout(()=>{
         blackout.style.opacity='0';
         firstVideo.style.opacity='0';
+
+        // SAFARI FIX: ensure bg video replays after transition
+        safelyPlay(bgVideo);
         bgVideo.style.opacity='1';
 
         setTimeout(()=>{
-          rig.classList.add('ready'); // top rod flies in
+          rig.classList.add('ready');
           setTimeout(()=>{
-            rig.classList.add('unrolling'); // parchment grows + bottom rod rides
+            rig.classList.add('unrolling');
             setTimeout(()=>{
-              rig.classList.add('opened'); // aura loop
+              rig.classList.add('opened');
               parchment.style.opacity='1';
-              // keep scroll active
               parchment.style.height='var(--sheetH)';
               parchment.style.overflowY='auto';
+              parchment.style.webkitOverflowScrolling = 'touch';
+              parchment.style.overscrollBehavior = 'contain';
+
               // fade in text
               h2.style.animation='fadeIn 1100ms ease forwards';
               let delay=350;
@@ -535,7 +546,8 @@ img.mediaFrame{
                 p.style.animationDelay=`${delay}ms`;
                 delay+=250;
               });
-              // bottom rod toggle at end
+
+              // scroll bottom toggle
               parchment.addEventListener('scroll',()=>{
                 const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
                 scrollBottom.style.opacity = nearBottom ? '1' : '0';
@@ -547,21 +559,22 @@ img.mediaFrame{
     }, FIRST_VIDEO_MS);
   }
 
-  startForm.addEventListener('submit', (e)=>{
+  startForm.addEventListener('submit',(e)=>{
     e.preventDefault();
-    const val = (passInput.value || '').trim().toLowerCase();
-    if(val === 'malik'){
-      err.style.opacity = 0;
+    const val=(passInput.value||'').trim().toLowerCase();
+    if(val==='malik'){
+      err.style.opacity=0;
       startExperience();
-    }else{
-      err.style.opacity = 1;
+    } else {
+      err.style.opacity=1;
       startForm.classList.add('shake');
-      setTimeout(()=>startForm.classList.remove('shake'), 280);
+      setTimeout(()=>startForm.classList.remove('shake'),280);
       passInput.focus();
       passInput.select();
     }
   });
 })();
 </script>
+
 </body>
 </html>
