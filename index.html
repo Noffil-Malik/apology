@@ -177,6 +177,21 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   -webkit-overflow-scrolling: touch !important;
   pointer-events: auto !important;
 }
+
+  /* Safari scroll unlock patch */
+#parchment {
+  position: relative !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+.opened #scene, .opened #scrollRig {
+  position: relative !important;
+  height: auto !important;
+}
+body.open-scroll {
+  overflow: auto !important;
+}
+
 </style>
 
 </head>
@@ -427,6 +442,8 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
             setTimeout(()=>{
               rig.classList.add('opened');
               parchment.style.opacity='1';
+
+              
               parchment.style.height='var(--sheetH)';
               parchment.style.overflowY='auto';
               parchment.style.pointerEvents='auto';
