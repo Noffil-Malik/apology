@@ -8,83 +8,86 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@400;600&family=Merriweather:wght@300;400;700&display=swap');
 
-:root {
+/* === THEME & DIMENSIONS === */
+:root{
   --gold-1:#fff6cf;
   --gold-2:#f4d56a;
   --gold-3:#d4a93c;
   --ink:#5a2b86;
-  --rodH:40px; /* smaller rods */
-  --sheetW:min(60vw,750px); /* reduced width */
-  --sheetH:min(70vh,960px);
+  --rodH:45px;
+  --sheetW:min(62vw,780px);
+  --sheetH:min(72vh,980px);
 }
 
+/* === BASE === */
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;background:#000;overflow:hidden}
+html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;overflow:hidden;background:#000}
+::selection{background:rgba(250,224,168,.6)}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 /* === INTRO === */
-#intro{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-background:radial-gradient(circle at 50% 10%,rgba(255,220,170,.25),transparent 70%),linear-gradient(180deg,#2a1650 0%,#451b78 50%,#6a0dad 100%);
-z-index:10;transition:opacity .8s ease;}
-#intro .gate{width:min(92vw,480px);padding:24px;border-radius:18px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);text-align:center}
-#intro h1{font-family:'Dancing Script',cursive;font-size:2.4rem;color:#fff;text-shadow:0 0 12px rgba(255,220,150,.6);}
-#unlockBtn{background:linear-gradient(90deg,var(--gold-1),var(--gold-2));color:#4c1f86;padding:12px 18px;border:0;border-radius:12px;cursor:pointer;font-weight:600;}
+#intro{
+  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 10%,rgba(255,220,170,.25),transparent 70%),linear-gradient(180deg,#24113f 0%, #401a72 40%, #6a0dad 100%);
+  z-index:10;transition:opacity .8s ease;
+}
+#intro .gate{width:min(92vw,520px);padding:26px;border-radius:18px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);text-align:center}
+#intro h1{font-family:'Dancing Script',cursive;font-size:2.6rem;color:#fff;text-shadow:0 0 14px rgba(255,220,150,.55);}
+#unlockBtn{background:linear-gradient(90deg,var(--gold-1),var(--gold-2));color:#4c1f86;border:0;padding:14px 18px;border-radius:12px;cursor:pointer;font-weight:600}
 
 /* === VIDEOS === */
 #firstVideo,#bgVideo{
   position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:100vw;height:100vh;object-fit:cover;object-position:center;background:#000;
-  transition:opacity 2s ease;z-index:1;opacity:0;pointer-events:none;
+  width:100vw;height:100vh;object-fit:cover;object-position:center;
+  background:#000;transition:opacity 2s ease;z-index:1;opacity:0;pointer-events:none;
 }
 
 /* === SCROLL === */
-#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;z-index:3}
+#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:8vh;z-index:3}
 #scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH) + var(--sheetH) + var(--rodH));}
-
 #scrollTop,#scrollBottom{
-  position:absolute;left:50%;width:calc(var(--sheetW) + 120px);height:var(--rodH);transform:translateX(-50%);
+  position:absolute;left:50%;width:calc(var(--sheetW) + 140px);height:var(--rodH);
+  transform:translateX(-50%);border-radius:999px;
   background:linear-gradient(180deg,var(--gold-1) 0%,var(--gold-2) 50%,var(--gold-3) 100%);
-  border-radius:999px;box-shadow:0 0 25px rgba(255,220,150,.5),inset 0 0 10px #fff;opacity:0;z-index:4;
+  box-shadow:0 0 28px rgba(255,220,150,.55),inset 0 0 12px #fff;
+  opacity:0;z-index:4;
 }
 #scrollBottom{transform:translateX(-50%) translateY(var(--sheetH));}
 
-#parchmentWrap{position:absolute;left:50%;top:calc(var(--rodH) - 20px);transform:translateX(-50%);
+#parchmentWrap{position:absolute;left:50%;top:calc(var(--rodH) - 22px);transform:translateX(-50%);
 width:var(--sheetW);height:var(--sheetH);}
 #parchment{
   position:absolute;width:100%;height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
   background:linear-gradient(to bottom,#fffdf6 0%,#fff7e6 45%,#fbe9bf 100%);
-  border-left:16px solid #dcbc6a;border-right:16px solid #dcbc6a;border-radius:20px;
-  box-shadow:0 0 60px 25px rgba(255,230,170,.8),inset 0 0 20px rgba(255,255,255,.5);
+  border-left:18px solid #dcbc6a;border-right:18px solid #dcbc6a;border-radius:20px;
+  box-shadow:0 0 70px 30px rgba(255,230,170,.8),inset 0 0 30px rgba(255,255,255,.5);
   color:var(--ink);padding:0 22px;opacity:0;
 }
-#parchment .pad{padding:36px 10px 50px;max-width:60ch;margin:0 auto;}
-#parchment h2{text-align:center;font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:12px;color:#5a2b86;}
-#parchment p{font-size:0.95rem;line-height:1.65;color:#49256f;margin:12px 0;}
+#parchment .pad{padding:40px 10px 60px;max-width:60ch;margin:0 auto;}
+#parchment h2{text-align:center;font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:12px;color:#5a2b86;}
+#parchment p{font-size:0.96rem;line-height:1.7;color:#49256f;margin:14px 0;}
 
 #parchment::-webkit-scrollbar{width:0;}#parchment{-ms-overflow-style:none;scrollbar-width:none;}
 
-/* Media frames */
-.mediaFrame{display:block;margin:24px auto;border:4px solid #dcbc6a;border-radius:14px;
-box-shadow:0 0 20px rgba(255,210,100,.4);max-width:90%;height:auto;}
+.mediaFrame{display:block;margin:28px auto;border:4px solid #dcbc6a;border-radius:14px;
+box-shadow:0 0 22px rgba(255,210,100,.4);max-width:90%;height:auto;}
 video.mediaFrame{object-fit:contain;background:#000;}
-
-/* Animations */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.ready #scrollTop{animation:fadeIn 1.2s ease forwards;}
-.unrolling #parchment{animation:fadeIn 2s ease forwards;}
-.unrolling #scrollBottom{animation:fadeIn 2s ease forwards;}
+.ready #scrollTop{animation:fadeIn 1.4s ease forwards;}
+.unrolling #parchment{animation:fadeIn 2.4s ease forwards;}
+.unrolling #scrollBottom{animation:fadeIn 2.4s ease forwards;}
 .opened #parchment{opacity:1;}
 </style>
-
 </head>
 <body>
 
-<!-- INTRO: passphrase form -->
+<!-- INTRO (unchanged) -->
 <section id="intro">
   <div class="gate">
     <h1>A Magical Surprise</h1>
     <p class="sub">Enter the secret word to unlock.</p>
     <form id="startForm" class="formRow" autocomplete="off">
-      <input id="passInput" type="text" inputmode="latin-name" placeholder="Enter passphrase" aria-label="Passphrase" />
+      <input id="passInput" type="text" placeholder="Enter passphrase" />
       <button id="unlockBtn" type="submit">Unlock</button>
     </form>
     <div id="hint">Hint: it’s my last name.</div>
@@ -92,23 +95,15 @@ video.mediaFrame{object-fit:contain;background:#000;}
   </div>
 </section>
 
-<!-- GOLDEN GLOW VEIL FOR PINK CLOUDS INTRO -->
-<div id="goldVeil"></div>
-
-<!-- PINK CLOUDS VIDEO (10s) -->
-<video id="firstVideo" muted playsinline preload="auto">
+<!-- VIDEOS -->
+<video id="firstVideo" playsinline muted preload="auto">
   <source src="first-video.mp4" type="video/mp4" />
 </video>
-
-<!-- BLACKOUT (2s) -->
-<div id="blackout"></div>
-
-<!-- HEAVEN VIDEO -->
-<video id="bgVideo" autoplay muted loop playsinline>
+<video id="bgVideo" playsinline muted preload="auto" loop>
   <source src="bg-video.mp4" type="video/mp4" />
 </video>
 
-<!-- SCROLL SCENE -->
+<!-- SCROLL -->
 <section id="scene">
   <div id="scrollRig">
     <div id="scrollTop"></div>
@@ -271,10 +266,8 @@ video.mediaFrame{object-fit:contain;background:#000;}
 
           <p><br> - N. M. </p>
 
-        </div>
-      </div>
+      </div></div>
     </div>
-
     <div id="scrollBottom"></div>
   </div>
 </section>
@@ -297,30 +290,28 @@ video.mediaFrame{object-fit:contain;background:#000;}
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
 
-    // Always muted (Safari requires it for autoplay)
-    firstVideo.muted = true;
-    bgVideo.muted = true;
+    // Keep muted permanently (autoplay-safe)
+    firstVideo.muted=true;
+    bgVideo.muted=true;
 
-    // Play first background video (clouds)
-    firstVideo.currentTime = 0;
-    firstVideo.playsInline = true;
+    // Play first video
+    firstVideo.currentTime=0;
     firstVideo.style.opacity='1';
     firstVideo.play().catch(()=>{});
 
-    // When first video ends, fade to bg-video
-    firstVideo.onended = ()=>{
+    // When first ends, fade & start bg video after 5s
+    firstVideo.onended=()=>{
       setTimeout(()=>{
         firstVideo.style.opacity='0';
-        bgVideo.style.opacity='1';
         bgVideo.currentTime=0;
-        bgVideo.playsInline=true;
+        bgVideo.style.opacity='1';
         bgVideo.play().catch(()=>{});
-        startScrollScene();
-      },3000);
+        startScroll();
+      },5000);
     };
   }
 
-  function startScrollScene(){
+  function startScroll(){
     rig.classList.add('ready');
     setTimeout(()=>{
       rig.classList.add('unrolling');
@@ -330,21 +321,21 @@ video.mediaFrame{object-fit:contain;background:#000;}
         parchment.style.overflowY='auto';
         parchment.style.opacity='1';
         h2.style.animation='fadeIn 1.2s ease forwards';
-        let delay=300;
+        let delay=350;
         paras.forEach(p=>{
           p.style.animation='fadeIn 1.2s ease forwards';
           p.style.animationDelay=`${delay}ms`;
           delay+=200;
         });
         parchment.addEventListener('scroll',()=>{
-          const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
-          scrollBottom.style.opacity = nearBottom ? '1' : '0';
+          const nearBottom=parchment.scrollTop+parchment.clientHeight>=parchment.scrollHeight-10;
+          scrollBottom.style.opacity=nearBottom?'1':'0';
         });
       },2000);
     },1500);
   }
 
-  startForm.addEventListener('submit',(e)=>{
+  startForm.addEventListener('submit',e=>{
     e.preventDefault();
     const val=(passInput.value||'').trim().toLowerCase();
     if(val==='malik'){
@@ -358,8 +349,6 @@ video.mediaFrame{object-fit:contain;background:#000;}
   });
 })();
 </script>
-
-
 
 </body>
 </html>
