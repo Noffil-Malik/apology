@@ -178,27 +178,46 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   const paras=parchment.querySelectorAll('p');
 
   function startExperience(){
-    intro.style.opacity='0';
-    setTimeout(()=>intro.classList.add('hidden'),800);
-    firstVideo.play().then(()=>firstVideo.pause());
-    bgVideo.play().then(()=>bgVideo.pause());
-    firstVideo.currentTime=0;
-    firstVideo.play().catch(()=>{});
-    firstVideo.style.opacity='1';
+  intro.style.opacity = '0';
+  setTimeout(()=>intro.classList.add('hidden'),800);
 
-    firstVideo.onended=()=>{
-      blackout.style.opacity='1';
-      setTimeout(()=>{
-        firstVideo.style.opacity='0';
-        firstVideo.pause();
-        blackout.style.opacity='0';
-        bgVideo.currentTime=0;
-        bgVideo.play().catch(()=>{});
-        bgVideo.style.opacity='1';
-        setTimeout(triggerScroll,3000);
-      },2000);
-    };
-  }
+  // ✅ Explicitly "unlock" both videos after the user tap
+  [firstVideo,bgVideo].forEach(v=>{
+    v.muted = true; // required to unlock autoplay
+    v.currentTime = 0;
+    v.play().then(()=>v.pause()).catch(()=>{});
+  });
+
+  // ✅ Now safely start first video
+  firstVideo.muted = true;
+  firstVideo.currentTime = 0;
+  firstVideo.play().then(()=>{
+    firstVideo.style.opacity = '1';
+  }).catch(err=>{
+    console.warn('Safari block:', err);
+  });
+
+  // ✅ Switch to bgVideo when done
+  firstVideo.onended = ()=>{
+    blackout.style.opacity = '1';
+    setTimeout(()=>{
+      firstVideo.pause();
+      firstVideo.style.opacity = '0';
+      blackout.style.opacity = '0';
+
+      bgVideo.muted = true;     // keep background silent
+      bgVideo.currentTime = 0;
+      bgVideo.play().then(()=>{
+        bgVideo.style.opacity = '1';
+      }).catch(err=>{
+        console.warn('bgVideo play blocked:', err);
+      });
+
+      setTimeout(triggerScroll,3000);
+    },2000);
+  };
+}
+
 
   function triggerScroll(){
     rig.classList.add('ready','unrolling');
