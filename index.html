@@ -372,63 +372,49 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   const firstVideo = document.getElementById('firstVideo');
   const blackout = document.getElementById('blackout');
   const bgVideo = document.getElementById('bgVideo');
-
   const rig = document.getElementById('scrollRig');
   const parchment = document.getElementById('parchment');
   const scrollBottom = document.getElementById('scrollBottom');
   const h2 = parchment.querySelector('h2');
   const paras = parchment.querySelectorAll('p');
 
-  function startExperience(){
-    intro.style.opacity = '0';
-    setTimeout(()=>intro.classList.add('hidden'), 800);
-
-    // Make sure both videos are muted for autoplay reliability
+  function unlockAllMedia(){
+    // pre-play both to "unlock" autoplay permission
     firstVideo.muted = true;
     bgVideo.muted = true;
+    firstVideo.play().then(()=>firstVideo.pause());
+    bgVideo.play().then(()=>bgVideo.pause());
+  }
 
-    // Preload background video early (Safari workaround)
-    bgVideo.load();
+  function startExperience(){
+    intro.style.opacity='0';
+    setTimeout(()=>intro.classList.add('hidden'),800);
 
-    // Start first video
-    firstVideo.currentTime = 0;
-    firstVideo.style.opacity = '1';
+    firstVideo.currentTime=0;
+    firstVideo.muted=true;
+    firstVideo.style.opacity='1';
     firstVideo.play().catch(()=>{});
     goldVeil.classList.add('veil-show');
 
-    firstVideo.onended = () => transitionToBG();
-    // Safety fallback
+    firstVideo.onended = transitionToBG;
     setTimeout(transitionToBG, 11000);
   }
 
   function transitionToBG(){
-    firstVideo.onended = null;
-    blackout.style.opacity = '1';
-
+    firstVideo.onended=null;
+    blackout.style.opacity='1';
     setTimeout(()=>{
-      // Hide first video
-      firstVideo.style.opacity = '0';
+      firstVideo.style.opacity='0';
       firstVideo.pause();
+      blackout.style.opacity='0';
 
-      // Start background video
-      bgVideo.style.opacity = '1';
-      const playPromise = bgVideo.play();
+      bgVideo.currentTime=0;
+      bgVideo.muted=true;
+      bgVideo.style.opacity='1';
+      bgVideo.play().catch(()=>{});
 
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Fallback: on tap, start it manually
-          window.addEventListener('touchstart', () => {
-            bgVideo.play();
-          }, { once:true });
-        });
-      }
-
-      // Fade from black
-      blackout.style.opacity = '0';
-
-      // After 3s, show scroll
       setTimeout(triggerScroll, 3000);
-    }, 2000);
+    },2000);
   }
 
   function triggerScroll(){
@@ -441,7 +427,6 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
         parchment.style.height='var(--sheetH)';
         parchment.style.overflowY='auto';
         parchment.style.touchAction='pan-y';
-
         h2.style.animation='fadeIn 1100ms ease forwards';
         let delay=350;
         paras.forEach(p=>{
@@ -449,8 +434,7 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
           p.style.animationDelay=`${delay}ms`;
           delay+=250;
         });
-
-        parchment.addEventListener('scroll', ()=>{
+        parchment.addEventListener('scroll',()=>{
           const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
           scrollBottom.style.opacity = nearBottom ? '1' : '0';
         });
@@ -458,22 +442,24 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
     },1700);
   }
 
-  startForm.addEventListener('submit', (e)=>{
+  startForm.addEventListener('submit',(e)=>{
     e.preventDefault();
     const val = (passInput.value || '').trim().toLowerCase();
     if(val === 'malik'){
       err.style.opacity = 0;
+      unlockAllMedia(); // Safari autoplay unlock
       startExperience();
     } else {
       err.style.opacity = 1;
       startForm.classList.add('shake');
-      setTimeout(()=>startForm.classList.remove('shake'), 280);
+      setTimeout(()=>startForm.classList.remove('shake'),280);
       passInput.focus();
       passInput.select();
     }
   });
 })();
 </script>
+
 
 
 </body>
