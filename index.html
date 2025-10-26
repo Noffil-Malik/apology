@@ -363,76 +363,73 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 
 <script>
 (function(){
-  const intro=document.getElementById('intro');
-  const startForm=document.getElementById('startForm');
-  const passInput=document.getElementById('passInput');
-  const err=document.getElementById('error');
+  const intro = document.getElementById('intro');
+  const startForm = document.getElementById('startForm');
+  const passInput = document.getElementById('passInput');
+  const err = document.getElementById('error');
 
-  const goldVeil=document.getElementById('goldVeil');
-  const firstVideo=document.getElementById('firstVideo');
-  const blackout=document.getElementById('blackout');
-  const bgVideo=document.getElementById('bgVideo');
+  const goldVeil = document.getElementById('goldVeil');
+  const firstVideo = document.getElementById('firstVideo');
+  const blackout = document.getElementById('blackout');
+  const bgVideo = document.getElementById('bgVideo');
 
-  const rig=document.getElementById('scrollRig');
-  const parchment=document.getElementById('parchment');
-  const scrollBottom=document.getElementById('scrollBottom');
-  const h2=parchment.querySelector('h2');
-  const paras=parchment.querySelectorAll('p');
+  const rig = document.getElementById('scrollRig');
+  const parchment = document.getElementById('parchment');
+  const scrollBottom = document.getElementById('scrollBottom');
+  const h2 = parchment.querySelector('h2');
+  const paras = parchment.querySelectorAll('p');
 
   function startExperience(){
-    // hide intro
-    intro.style.opacity='0';
-    setTimeout(()=>intro.classList.add('hidden'),800);
+    intro.style.opacity = '0';
+    setTimeout(()=>intro.classList.add('hidden'), 800);
 
-    // ensure videos reset and muted (Safari autoplay safe)
+    // Make sure both videos are muted for autoplay reliability
     firstVideo.muted = true;
     bgVideo.muted = true;
 
-    // play first video
+    // Preload background video early (Safari workaround)
+    bgVideo.load();
+
+    // Start first video
     firstVideo.currentTime = 0;
-    firstVideo.style.opacity='1';
+    firstVideo.style.opacity = '1';
     firstVideo.play().catch(()=>{});
     goldVeil.classList.add('veil-show');
 
-    // when first video ends (or after 10s timeout)
-    firstVideo.onended = transitionToBG;
-    setTimeout(transitionToBG, 10500); // fallback in case Safari blocks onended
+    firstVideo.onended = () => transitionToBG();
+    // Safety fallback
+    setTimeout(transitionToBG, 11000);
   }
 
   function transitionToBG(){
-  firstVideo.onended = null;
-  blackout.style.opacity = '1';
+    firstVideo.onended = null;
+    blackout.style.opacity = '1';
 
-  setTimeout(()=>{
-    // Hide first video
-    firstVideo.style.opacity = '0';
-    firstVideo.pause();
-    firstVideo.currentTime = 0;
+    setTimeout(()=>{
+      // Hide first video
+      firstVideo.style.opacity = '0';
+      firstVideo.pause();
 
-    // Fade back in
-    blackout.style.opacity = '0';
-
-    // Force reload and play bgVideo safely
-    bgVideo.load();
-    bgVideo.muted = true;
-    bgVideo.play().then(()=>{
+      // Start background video
       bgVideo.style.opacity = '1';
-    }).catch(err=>{
-      console.warn("Autoplay blocked:", err);
-      // Safari fallback: user gesture handler
-      const tapHandler = () => {
-        bgVideo.play();
-        bgVideo.style.opacity = '1';
-        window.removeEventListener('touchstart', tapHandler);
-      };
-      window.addEventListener('touchstart', tapHandler);
-    });
+      const playPromise = bgVideo.play();
 
-    // After 3s, bring scroll
-    setTimeout(triggerScroll, 3000);
-  }, 2000);
-}
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Fallback: on tap, start it manually
+          window.addEventListener('touchstart', () => {
+            bgVideo.play();
+          }, { once:true });
+        });
+      }
 
+      // Fade from black
+      blackout.style.opacity = '0';
+
+      // After 3s, show scroll
+      setTimeout(triggerScroll, 3000);
+    }, 2000);
+  }
 
   function triggerScroll(){
     rig.classList.add('ready');
@@ -444,6 +441,7 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
         parchment.style.height='var(--sheetH)';
         parchment.style.overflowY='auto';
         parchment.style.touchAction='pan-y';
+
         h2.style.animation='fadeIn 1100ms ease forwards';
         let delay=350;
         paras.forEach(p=>{
@@ -451,7 +449,8 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
           p.style.animationDelay=`${delay}ms`;
           delay+=250;
         });
-        parchment.addEventListener('scroll',()=>{
+
+        parchment.addEventListener('scroll', ()=>{
           const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
           scrollBottom.style.opacity = nearBottom ? '1' : '0';
         });
@@ -459,22 +458,23 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
     },1700);
   }
 
-  startForm.addEventListener('submit',(e)=>{
+  startForm.addEventListener('submit', (e)=>{
     e.preventDefault();
-    const val=(passInput.value||'').trim().toLowerCase();
-    if(val==='malik'){
-      err.style.opacity=0;
+    const val = (passInput.value || '').trim().toLowerCase();
+    if(val === 'malik'){
+      err.style.opacity = 0;
       startExperience();
-    }else{
-      err.style.opacity=1;
+    } else {
+      err.style.opacity = 1;
       startForm.classList.add('shake');
-      setTimeout(()=>startForm.classList.remove('shake'),280);
+      setTimeout(()=>startForm.classList.remove('shake'), 280);
       passInput.focus();
       passInput.select();
     }
   });
 })();
 </script>
+
 
 </body>
 </html>
