@@ -443,6 +443,14 @@ body.open-scroll {
               rig.classList.add('opened');
               parchment.style.opacity='1';
 
+              document.body.classList.add('open-scroll');
+parchment.style.position = 'relative';
+parchment.style.overflowY = 'scroll';
+parchment.style.touchAction = 'pan-y';
+parchment.scrollTo(0,1);
+setTimeout(()=>parchment.scrollTo(0,0),200);
+
+
               
               parchment.style.height='var(--sheetH)';
               parchment.style.overflowY='auto';
