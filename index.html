@@ -189,11 +189,9 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   pointer-events: auto;
 }
 
-#scene, #scrollRig {
-  perspective: 1700px;
-  transform-style: preserve-3d;
-  pointer-events: none;             /* block gestures here */
-}
+#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;z-index:3;}
+#scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH)*2 + var(--sheetH));}
+
 
 #parchment * {
   pointer-events: auto;             /* allow links / media inside parchment */
