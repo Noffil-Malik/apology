@@ -391,6 +391,15 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   const h2=parchment.querySelector('h2');
   const paras=parchment.querySelectorAll('p');
 
+  function enableScrollFix(){
+    // Force-enable scroll by toggling visibility and focus
+    parchment.style.pointerEvents='auto';
+    parchment.style.overflowY='scroll';
+    parchment.tabIndex = 0;
+    parchment.scrollTo(0,1);
+    setTimeout(()=>parchment.scrollTo(0,0),200);
+  }
+
   function startExperience(){
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
@@ -403,15 +412,13 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
         blackout.style.opacity='0';
         firstVideo.style.opacity='0';
         bgVideo.muted = true;
-bgVideo.currentTime = 0;
-bgVideo.play().then(()=>{
-  bgVideo.style.opacity='1';
-}).catch(err=>{
-  console.warn('bgVideo blocked:', err);
-  // fallback for Safari
-  bgVideo.addEventListener('click', ()=> bgVideo.play(), { once: true });
-});
-
+        bgVideo.currentTime = 0;
+        bgVideo.play().then(()=>{
+          bgVideo.style.opacity='1';
+        }).catch(err=>{
+          console.warn('bgVideo blocked:', err);
+          bgVideo.addEventListener('click', ()=> bgVideo.play(), { once: true });
+        });
 
         setTimeout(()=>{
           rig.classList.add('ready');
@@ -420,14 +427,10 @@ bgVideo.play().then(()=>{
             setTimeout(()=>{
               rig.classList.add('opened');
               parchment.style.opacity='1';
-
-              parchment.style.pointerEvents='auto';
-parchment.style.overflowY='scroll';
-parchment.scrollTo(0, 1); // activates scroll region
-setTimeout(()=>parchment.scrollTo(0,0),100); // resets position
-
               parchment.style.height='var(--sheetH)';
               parchment.style.overflowY='auto';
+              parchment.style.pointerEvents='auto';
+              enableScrollFix(); // ← this is key
 
               // fade-in text
               h2.style.animation='fadeIn 1.1s ease forwards';
@@ -438,7 +441,6 @@ setTimeout(()=>parchment.scrollTo(0,0),100); // resets position
                 delay+=250;
               });
 
-              // scroll indicator logic
               parchment.addEventListener('scroll',()=>{
                 const nearBottom=parchment.scrollTop+parchment.clientHeight>=parchment.scrollHeight-10;
                 scrollBottom.style.opacity=nearBottom?'1':'0';
