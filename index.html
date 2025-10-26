@@ -168,7 +168,31 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 #parchment::-webkit-scrollbar-thumb{background:#c9a84f;border-radius:4px;}
 #parchment::-webkit-scrollbar-track{background:rgba(0,0,0,.1);}
 
-  
+/* === FINAL FIX: SCROLL INSIDE PARCHMENT === */
+#parchment {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  height: var(--sheetH);
+  max-height: var(--sheetH);
+  pointer-events: auto !important;
+}
+
+#scene, #scrollRig {
+  pointer-events: none;
+}
+
+#parchment * {
+  pointer-events: auto;
+}
+
+html, body {
+  overflow: hidden !important; /* Prevent entire page from moving */
+  height: 100%;
+  touch-action: none;
+}
+
 </style>
 </head>
 
