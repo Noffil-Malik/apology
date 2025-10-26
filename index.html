@@ -21,7 +21,7 @@
 
 /* === BASE === */
 *{box-sizing:border-box;}
-html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;background:#000}
+html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff; overflow:hidden;background:#000}
 ::selection{background:rgba(250,224,168,.6)}
 body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
@@ -439,17 +439,6 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
     else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
   });
 })();
-</script>
-
-  <script>
-function setParchmentHeight() {
-  var vh = Math.max(window.innerHeight, document.documentElement.clientHeight);
-  document.documentElement.style.setProperty('--sheetH', Math.min(vh * 0.78, 1080) + 'px');
-}
-// Update height on resize or orientation change
-window.addEventListener('resize', setParchmentHeight);
-window.addEventListener('orientationchange', setParchmentHeight);
-setParchmentHeight();
 </script>
 
 </body>
