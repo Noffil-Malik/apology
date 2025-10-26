@@ -200,10 +200,11 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 }
 
 html, body {
-  overflow: hidden;                 /* prevent the whole page from scrolling */
   height: 100%;
-  touch-action: none;               /* block general page swiping */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
+
 
 
 
