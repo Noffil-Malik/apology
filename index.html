@@ -448,6 +448,18 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
     else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
   });
 })();
+
+// --- iPhone Safari scroll unlock ---
+const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+if (isiOS) {
+  parchment.style.position = 'relative';
+  parchment.style.transform = 'translateZ(0)';
+  parchment.style.overflowY = 'auto';
+  parchment.style.webkitOverflowScrolling = 'touch';
+}
+
+  
+  
 </script>
 
 </body>
