@@ -220,6 +220,23 @@ body, html {
   text-justify: inter-word;
 }
 
+  /* === FINAL SAFARI INNER SCROLL FIX === */
+#parchment {
+  position: relative !important;
+  height: var(--sheetH) !important;
+  max-height: var(--sheetH) !important;
+  overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
+  scroll-behavior: smooth !important;
+}
+
+body.noScroll {
+  overflow: hidden !important;
+}
+
+
 </style>
 
 </head>
@@ -470,6 +487,17 @@ body, html {
             setTimeout(()=>{
               rig.classList.add('opened');
               parchment.style.opacity='1';
+
+              // Enable parchment-only scrolling on Safari
+document.body.classList.add('noScroll');
+parchment.style.pointerEvents = 'auto';
+parchment.scrollTop = 0;
+setTimeout(() => {
+  parchment.focus();
+  parchment.scrollTo(0, 1);
+  setTimeout(() => parchment.scrollTo(0, 0), 300);
+}, 200);
+
 
               document.body.classList.add('opened');
 document.body.style.overflowY = 'auto';
