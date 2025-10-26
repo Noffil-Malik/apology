@@ -390,8 +390,16 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
       setTimeout(()=>{
         blackout.style.opacity='0';
         firstVideo.style.opacity='0';
-        bgVideo.style.opacity='1';
-        bgVideo.play().catch(()=>{});
+        bgVideo.muted = true;
+bgVideo.currentTime = 0;
+bgVideo.play().then(()=>{
+  bgVideo.style.opacity='1';
+}).catch(err=>{
+  console.warn('bgVideo blocked:', err);
+  // fallback for Safari
+  bgVideo.addEventListener('click', ()=> bgVideo.play(), { once: true });
+});
+
 
         setTimeout(()=>{
           rig.classList.add('ready');
