@@ -478,96 +478,75 @@ img.mediaFrame{
 
 <script>
 (function(){
-  // elements
-  const intro       = document.getElementById('intro');
-  const startForm   = document.getElementById('startForm');
-  const passInput   = document.getElementById('passInput');
-  const err         = document.getElementById('error');
+  const FIRST_VIDEO_MS = 10000;      
+  const BLACKOUT_MS = 2000;          
+  const EXTRA_DELAY_AFTER_BG = 3000; 
 
-  const goldVeil    = document.getElementById('goldVeil');
-  const firstVideo  = document.getElementById('firstVideo'); // clouds intro
-  const blackout    = document.getElementById('blackout');
-  const bgVideo     = document.getElementById('bgVideo');    // heaven loop
+  const intro=document.getElementById('intro');
+  const startForm=document.getElementById('startForm');
+  const passInput=document.getElementById('passInput');
+  const err=document.getElementById('error');
 
-  const rig         = document.getElementById('scrollRig');
-  const parchment   = document.getElementById('parchment');
-  const scrollBottom= document.getElementById('scrollBottom');
-  const h2          = parchment.querySelector('h2');
-  const paras       = parchment.querySelectorAll('p');
+  const goldVeil=document.getElementById('goldVeil');
+  const firstVideo=document.getElementById('firstVideo');
+  const blackout=document.getElementById('blackout');
+  const bgVideo=document.getElementById('bgVideo');
 
-  // --- helpers ---
-  function ensureInlineAutoplay(video){
-    if(!video) return;
-    video.setAttribute('playsinline','');
-    video.setAttribute('webkit-playsinline','');
-    video.muted = true; // required for autoplay on iOS
-    video.preload = video.preload || 'auto';
-    video.load();
-  }
+  const rig=document.getElementById('scrollRig');
+  const parchment=document.getElementById('parchment');
+  const scrollBottom=document.getElementById('scrollBottom');
+  const h2=parchment.querySelector('h2');
+  const paras=parchment.querySelectorAll('p');
 
-  function tryPlay(video){
-    const p = video.play();
-    if (p && typeof p.catch === 'function') {
-      p.catch(()=> {
-        // retry once shortly after; iOS sometimes needs a tick
-        setTimeout(()=> video.play().catch(()=>{}), 60);
-      });
-    }
-  }
-
-  function fadeIn(el, durMs=1500){ el.style.transition = `opacity ${durMs}ms ease`; el.style.opacity = '1'; }
-  function fadeOut(el, durMs=1500){ el.style.transition = `opacity ${durMs}ms ease`; el.style.opacity = '0'; }
-
-  // --- main sequence ---
   function startExperience(){
-    // hide gate
-    intro.style.opacity = '0';
-    setTimeout(()=> intro.classList.add('hidden'), 800);
+    intro.style.opacity='0';
+    setTimeout(()=>intro.classList.add('hidden'),800);
 
-    // prepare both videos for iOS
-    ensureInlineAutoplay(firstVideo);
-    ensureInlineAutoplay(bgVideo);
+    // play the pink clouds
+    firstVideo.style.opacity='1';
+    firstVideo.muted = true;
+    firstVideo.play().catch(()=>{});
+    goldVeil.classList.add('veil-show');
 
-    // start first (clouds) video when metadata is ready (more reliable than timers)
-    const startFirst = ()=> {
-      goldVeil.classList.add('veil-show');
-      fadeIn(firstVideo, 1200);
-      tryPlay(firstVideo);
-    };
-    if (firstVideo.readyState >= 1) startFirst();
-    else firstVideo.addEventListener('loadeddata', startFirst, { once:true });
+    // preload bg-video early for Safari
+    bgVideo.load();
+    bgVideo.muted = false; // allow sound later
+    bgVideo.playsInline = true;
 
-    // when first video ends, blackout & switch to bg
-    const proceedToBg = ()=>{
-      // guard: avoid double-run
-      firstVideo.removeEventListener('ended', proceedToBg);
-      fadeIn(blackout, 800);
+    // when pink clouds finish
+    setTimeout(()=>{
+      blackout.style.opacity='1';
       setTimeout(()=>{
-        fadeOut(firstVideo, 400);
-        // prepare heaven video, then reveal it
-        const showBg = ()=>{
-          fadeOut(blackout, 800);
-          fadeIn(bgVideo, 1200);
-          tryPlay(bgVideo);
+        blackout.style.opacity='0';
+        firstVideo.style.opacity='0';
 
-          // after bg is visible, run scroll sequence
-          openScroll();
-        };
-        // start bg when it's at least loadable
-        if (bgVideo.readyState >= 1) showBg();
-        else {
-          bgVideo.addEventListener('loadeddata', showBg, { once:true });
-          tryPlay(bgVideo); // kick it anyway
-        }
-      }, 600);
-    };
+        // ensure bg video starts and fades in
+        bgVideo.play().then(()=>{
+          bgVideo.style.opacity='1';
+        }).catch(()=>{
+          // Safari fallback
+          const tapToStart = document.createElement('div');
+          tapToStart.innerHTML = "Tap to Continue";
+          Object.assign(tapToStart.style, {
+            position:'fixed',inset:0,display:'flex',alignItems:'center',justifyContent:'center',
+            background:'rgba(0,0,0,0.7)',color:'#fff',fontSize:'1.5rem',zIndex:'50'
+          });
+          document.body.appendChild(tapToStart);
+          tapToStart.addEventListener('click',()=>{
+            tapToStart.remove();
+            bgVideo.play();
+            bgVideo.style.opacity='1';
+            triggerScroll();
+          });
+        });
 
-    // proceed when the first video actually ends; also add a hard fallback in case file is short/loopless
-    firstVideo.addEventListener('ended', proceedToBg, { once:true });
-    setTimeout(()=> { if (!bgVideo.style.opacity || bgVideo.style.opacity==='0') proceedToBg(); }, 14000); // fallback
+        // scroll trigger after delay
+        setTimeout(triggerScroll, EXTRA_DELAY_AFTER_BG + 1500);
+      }, BLACKOUT_MS);
+    }, FIRST_VIDEO_MS);
   }
 
-  function openScroll(){
+  function triggerScroll(){
     rig.classList.add('ready');
     setTimeout(()=>{
       rig.classList.add('unrolling');
@@ -576,45 +555,32 @@ img.mediaFrame{
         parchment.style.opacity='1';
         parchment.style.height='var(--sheetH)';
         parchment.style.overflowY='auto';
-        parchment.style.webkitOverflowScrolling='touch';
-        parchment.style.overscrollBehavior='contain';
-
-        // fade in text
         h2.style.animation='fadeIn 1100ms ease forwards';
         let delay=350;
+        const paras=parchment.querySelectorAll('p');
         paras.forEach(p=>{
-          p.style.animation='fadeIn 1100ms ease forwards';
+          p.style.animation=`fadeIn 1100ms ease forwards`;
           p.style.animationDelay=`${delay}ms`;
           delay+=250;
         });
-
-        // bottom rod visibility near end
-        parchment.addEventListener('scroll', ()=>{
+        parchment.addEventListener('scroll',()=>{
           const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
           scrollBottom.style.opacity = nearBottom ? '1' : '0';
         });
-      }, 2700);
-    }, 1700);
+      },2700);
+    },1700);
   }
 
-  // iOS: if the page was backgrounded during video changes, resume background loop
-  document.addEventListener('visibilitychange', ()=>{
-    if (!document.hidden && bgVideo && bgVideo.style.opacity === '1') {
-      tryPlay(bgVideo);
-    }
-  });
-
-  // passphrase gate
   startForm.addEventListener('submit', (e)=>{
     e.preventDefault();
-    const val = (passInput.value||'').trim().toLowerCase();
-    if (val === 'malik') {
+    const val = (passInput.value || '').trim().toLowerCase();
+    if(val === 'malik'){
       err.style.opacity = 0;
       startExperience();
-    } else {
+    }else{
       err.style.opacity = 1;
       startForm.classList.add('shake');
-      setTimeout(()=> startForm.classList.remove('shake'), 280);
+      setTimeout(()=>startForm.classList.remove('shake'), 280);
       passInput.focus();
       passInput.select();
     }
@@ -622,22 +588,18 @@ img.mediaFrame{
 })();
 </script>
 
-  <script>
-// Safari fix: ensure bg-video is fully loaded before scroll logic runs
-const bgVideo = document.getElementById('bgVideo');
-if (bgVideo) {
-  bgVideo.addEventListener('loadeddata', () => {
-    console.log('bg-video ready');
-    // if it was invisible, fade it in manually
-    if (bgVideo.style.opacity === '' || bgVideo.style.opacity === '0') {
-      bgVideo.style.transition = 'opacity 1.5s ease';
-      bgVideo.style.opacity = '1';
-    }
+
+<script>
+document.addEventListener('touchstart', function once() {
+  document.querySelectorAll('video').forEach(v=>{
+    v.muted = true;
+    v.playsInline = true;
+    v.play().catch(()=>{});
   });
-  // force Safari to actually load the file
-  bgVideo.load();
-}
+  document.removeEventListener('touchstart', once);
+});
 </script>
+
 
 
 </body>
