@@ -447,9 +447,8 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
     if(val==='malik'){err.style.opacity=0;startExperience();}
     else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
   });
-})();
 
-// --- iPhone Safari scroll unlock ---
+  // --- iPhone Safari scroll unlock ---
 const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 if (isiOS) {
   parchment.style.position = 'relative';
@@ -458,6 +457,8 @@ if (isiOS) {
   parchment.style.webkitOverflowScrolling = 'touch';
 }
 
+  
+})();
   
   
 </script>
