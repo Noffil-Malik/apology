@@ -12,16 +12,16 @@
   --gold-2:#f4d56a;
   --gold-3:#d4a93c;
   --ink:#5a2b86;
-  --rodH:45px;                /* smaller rods */
-  --sheetW:min(60vw,700px);   /* narrower scroll */
+  --rodH:45px;
+  --sheetW:min(60vw,700px);
   --sheetH:min(75vh,900px);
 }
 
-/* === BASE === */
+/* BASE */
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Merriweather',serif;overflow:hidden}
 
-/* === INTRO === */
+/* INTRO */
 #intro{
   position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;
   background:linear-gradient(180deg,#24113f 0%,#401a72 40%,#6a0dad 100%);
@@ -51,25 +51,25 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Merriweat
 #hint{margin-top:8px;font-size:.9rem;color:#ffdca0;}
 #error{margin-top:8px;font-size:.9rem;color:#ffb3b3;opacity:0;transition:opacity .3s;}
 
-/* === VIDEOS === */
+/* VIDEOS */
 #firstVideo,#bgVideo{
   position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
   width:100vw;height:100vh;object-fit:cover;object-position:center;background:#000;
   opacity:0;transition:opacity 2s ease;z-index:1;
 }
 
-/* === BLACKOUT === */
+/* BLACKOUT */
 #blackout{position:fixed;inset:0;background:#000;z-index:7;opacity:0;transition:opacity 2s ease;pointer-events:none;}
 
-/* === SCROLL === */
+/* SCROLL */
 #scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;perspective:1700px;z-index:3;}
-#scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH)*2 + var(--sheetH));}
+#scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH)*2 + var(--sheetH));transform-style:preserve-3d;}
 #scrollTop,#scrollBottom{
   position:absolute;left:50%;transform:translateX(-50%);
   width:calc(var(--sheetW) + 140px);height:var(--rodH);
   border-radius:999px;
   background:linear-gradient(180deg,var(--gold-1),var(--gold-2) 40%,var(--gold-3) 100%);
-  box-shadow:0 0 30px 8px rgba(255,220,150,.55),inset 0 0 12px rgba(255,255,255,.9);
+  box-shadow:0 0 18px 4px rgba(255,220,150,.45),inset 0 0 8px rgba(255,255,255,.8);
   opacity:0;z-index:4;
 }
 #scrollTop{top:0;}
@@ -81,15 +81,34 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Merriweat
   overflow-y:auto;-webkit-overflow-scrolling:touch;
   border-left:18px solid #dcbc6a;border-right:18px solid #dcbc6a;border-radius:18px;
   background:linear-gradient(to bottom,#fffdf6 0%,#fff7e6 50%,#fbe9bf 100%);
-  box-shadow:0 0 70px 30px rgba(255,230,170,.9),inset 0 0 24px rgba(255,255,255,.5);
+  box-shadow:0 0 40px 16px rgba(255,230,170,.8),inset 0 0 18px rgba(255,255,255,.4);
   color:var(--ink);padding:0 24px;opacity:0;
 }
 .opened #parchment{height:var(--sheetH);overflow-y:auto;}
 #parchment::-webkit-scrollbar{width:0;}#parchment{scrollbar-width:none;}
-
 #parchment .pad{padding:36px 10px 48px;max-width:60ch;margin:0 auto;}
 #parchment h2{text-align:center;font-family:'Playfair Display',serif;color:#5a2b86;margin:0 0 10px;font-size:1.7rem;}
 #parchment p{margin:12px 0;font-size:0.95rem;line-height:1.65;color:#482a6e;}
+
+/* Fly-in + Unroll Animations */
+@keyframes flyInRod {
+  0% {transform:translateX(-50%) translateZ(-900px) scale(.25);opacity:0;}
+  60% {transform:translateX(-50%) translateZ(-200px) scale(.8);opacity:1;}
+  100% {transform:translateX(-50%) translateZ(80px) scale(1);opacity:1;}
+}
+@keyframes unrollDown {
+  0%{height:0;opacity:0;}
+  100%{height:var(--sheetH);opacity:1;}
+}
+@keyframes bottomRide {
+  0%{transform:translateX(-50%) translateY(0);opacity:0;}
+  100%{transform:translateX(-50%) translateY(var(--sheetH));opacity:1;}
+}
+
+.ready #scrollTop{animation:flyInRod 1.6s ease-out forwards;}
+.unrolling #parchment{animation:unrollDown 2.6s cubic-bezier(.22,.7,.1,1) forwards;}
+.unrolling #scrollBottom{animation:bottomRide 2.6s cubic-bezier(.22,.7,.1,1) forwards;}
+.opened #parchment{animation-play-state:running;}
 
 .mediaFrame{display:block;margin:24px auto;border:4px solid #dcbc6a;border-radius:12px;box-shadow:0 0 20px rgba(255,210,100,.4);max-width:90%;height:auto;}
 video.mediaFrame{object-fit:contain;width:auto;max-width:90%;max-height:80vh;background:#000;}
@@ -290,8 +309,8 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 
 <script>
 const intro=document.getElementById('intro');
-const startForm=document.getElementById('startForm');
-const passInput=document.getElementById('passInput');
+const form=document.getElementById('startForm');
+const input=document.getElementById('passInput');
 const err=document.getElementById('error');
 const firstVideo=document.getElementById('firstVideo');
 const blackout=document.getElementById('blackout');
@@ -335,11 +354,11 @@ function startScroll(){
   },1500);
 }
 
-startForm.addEventListener('submit',e=>{
+form.addEventListener('submit',e=>{
   e.preventDefault();
-  const val=(passInput.value||'').trim().toLowerCase();
+  const val=(input.value||'').trim().toLowerCase();
   if(val==='malik'){err.style.opacity=0;startExperience();}
-  else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
+  else{err.style.opacity=1;form.classList.add('shake');setTimeout(()=>form.classList.remove('shake'),280);}
 });
 </script>
 
