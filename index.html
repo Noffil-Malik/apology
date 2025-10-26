@@ -622,6 +622,23 @@ img.mediaFrame{
 })();
 </script>
 
+  <script>
+// Safari fix: ensure bg-video is fully loaded before scroll logic runs
+const bgVideo = document.getElementById('bgVideo');
+if (bgVideo) {
+  bgVideo.addEventListener('loadeddata', () => {
+    console.log('bg-video ready');
+    // if it was invisible, fade it in manually
+    if (bgVideo.style.opacity === '' || bgVideo.style.opacity === '0') {
+      bgVideo.style.transition = 'opacity 1.5s ease';
+      bgVideo.style.opacity = '1';
+    }
+  });
+  // force Safari to actually load the file
+  bgVideo.load();
+}
+</script>
+
 
 </body>
 </html>
