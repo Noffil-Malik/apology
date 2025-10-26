@@ -193,6 +193,42 @@ html, body {
   touch-action: none;
 }
 
+/* === FINAL FIX: SCROLLING RESTORE === */
+#scene, #scrollRig {
+  pointer-events: auto !important;
+}
+
+#parchment {
+  overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  height: var(--sheetH) !important;
+  max-height: var(--sheetH) !important;
+  pointer-events: auto !important;
+}
+
+/* Make scrollbar visible */
+#parchment::-webkit-scrollbar {
+  width: 10px;
+}
+#parchment::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--gold-2), var(--gold-3));
+  border-radius: 6px;
+}
+#parchment::-webkit-scrollbar-track {
+  background: rgba(0,0,0,.25);
+  border-radius: 6px;
+}
+
+/* Prevent whole page from moving */
+html, body {
+  overflow: hidden !important;
+  height: 100%;
+  touch-action: manipulation;
+}
+  
+  
 
 </style>
 </head>
