@@ -360,5 +360,79 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 })();
 </script>
 
+  <script>
+const intro = document.getElementById("intro");
+const form = document.getElementById("startForm");
+const passInput = document.getElementById("passInput");
+const errorMsg = document.getElementById("error");
+
+const firstVideo = document.getElementById("firstVideo");
+const bgVideo = document.getElementById("bgVideo");
+const blackout = document.getElementById("blackout");
+const rig = document.getElementById("scrollRig");
+const parchment = document.getElementById("parchment");
+const scrollBottom = document.getElementById("scrollBottom");
+
+// Play first video, then fade to black, then show bg video
+function startExperience() {
+  intro.style.opacity = "0";
+  setTimeout(() => intro.classList.add("hidden"), 800);
+
+  firstVideo.muted = true;
+  bgVideo.muted = true;
+
+  firstVideo.style.opacity = "1";
+  firstVideo.currentTime = 0;
+  firstVideo.play().catch(() => {});
+
+  firstVideo.onended = () => {
+    blackout.style.opacity = "1";
+    setTimeout(() => {
+      firstVideo.style.opacity = "0";
+      blackout.style.opacity = "0";
+
+      bgVideo.style.opacity = "1";
+      bgVideo.currentTime = 0;
+      bgVideo.play().catch(() => {});
+
+      showScroll();
+    }, 2000); // 2 s blackout
+  };
+}
+
+function showScroll() {
+  rig.classList.add("ready");
+  setTimeout(() => {
+    rig.classList.add("unrolling");
+    setTimeout(() => {
+      rig.classList.add("opened");
+      parchment.style.opacity = "1";
+      parchment.style.height = "var(--sheetH)";
+      parchment.style.overflowY = "auto";
+      parchment.addEventListener("scroll", () => {
+        const nearBottom =
+          parchment.scrollTop + parchment.clientHeight >=
+          parchment.scrollHeight - 10;
+        scrollBottom.style.opacity = nearBottom ? "1" : "0";
+      });
+    }, 2600);
+  }, 1600);
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const val = (passInput.value || "").trim().toLowerCase();
+  if (val === "malik") {
+    errorMsg.style.opacity = 0;
+    startExperience();
+  } else {
+    errorMsg.style.opacity = 1;
+    form.classList.add("shake");
+    setTimeout(() => form.classList.remove("shake"), 280);
+  }
+});
+</script>
+
+
 </body>
 </html>
