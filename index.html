@@ -6,272 +6,75 @@
 <title>Cinematic Cloud Transition Scroll</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@400;600&family=Merriweather:wght@300;400;700&display=swap');
 
-/* === THEME & DIMENSIONS === */
-:root{
+:root {
   --gold-1:#fff6cf;
   --gold-2:#f4d56a;
   --gold-3:#d4a93c;
   --ink:#5a2b86;
-  --ink-soft:#6b3a96;
-
-  --rodH:60px;
-  --sheetW:min(68vw,850px);
-  --sheetH:min(78vh,1080px);
+  --rodH:40px; /* smaller rods */
+  --sheetW:min(60vw,750px); /* reduced width */
+  --sheetH:min(70vh,960px);
 }
 
-/* === BASE === */
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;overflow:hidden;background:#000}
-::selection{background:rgba(250,224,168,.6)}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;background:#000;overflow:hidden}
 
-/* === INTRO (Passphrase Gate) === */
-#intro{
-  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px;text-align:center;z-index:10;transition:opacity .8s ease;
-  background:
-    radial-gradient(1400px 700px at 50% 0%, rgba(255,220,170,.25), rgba(0,0,0,0) 60%),
-    linear-gradient(180deg,#24113f 0%, #401a72 40%, #6a0dad 100%);
-}
-#intro .gate{
-  width:min(92vw,520px);
-  background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-  backdrop-filter: blur(10px);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:18px;
-  padding:28px 22px 24px;
-  box-shadow:0 10px 60px rgba(0,0,0,.35), 0 0 40px rgba(255,220,150,.15);
-}
-#intro h1{
-  font-family:'Dancing Script',cursive;
-  font-size:2.6rem; margin:0 0 6px; color:#fff;
-  text-shadow:0 0 16px rgba(255,220,150,.55);
-}
-#intro p.sub{
-  margin:0 0 18px; color:rgba(255,255,255,.86); font-size:1.02rem;
-}
-.formRow{
-  display:flex; gap:10px; align-items:center; justify-content:center;
-}
-#passInput{
-  flex:1; min-width:0;
-  font-size:1.05rem; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.35);
-  background:rgba(0,0,0,.25); color:#fff; outline:none;
-  box-shadow:inset 0 0 0 9999px rgba(255,255,255,.04);
-}
-#passInput::placeholder{color:rgba(255,255,255,.55)}
-#unlockBtn{
-  border:0; padding:14px 18px; border-radius:12px; cursor:pointer; white-space:nowrap;
-  background:linear-gradient(90deg,var(--gold-1),var(--gold-2));
-  color:#4c1f86; font-size:1.02rem; font-weight:600;
-  box-shadow:0 0 18px rgba(255,220,150,.45);
-  transition:transform .15s ease, filter .2s ease;
-}
-#unlockBtn:hover{ transform:translateY(-1px); filter:brightness(1.05); }
-#hint{
-  margin-top:10px; font-size:.95rem; color:#ffdca0; opacity:.9;
-}
-#error{
-  margin-top:10px; font-size:.95rem; color:#ffb3b3; opacity:0; transition:opacity .2s ease;
-}
-.shake{ animation:shake .25s linear 1; }
-@keyframes shake{
-  0%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-4px)} 100%{transform:translateX(0)}
-}
+/* === INTRO === */
+#intro{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+background:radial-gradient(circle at 50% 10%,rgba(255,220,170,.25),transparent 70%),linear-gradient(180deg,#2a1650 0%,#451b78 50%,#6a0dad 100%);
+z-index:10;transition:opacity .8s ease;}
+#intro .gate{width:min(92vw,480px);padding:24px;border-radius:18px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);text-align:center}
+#intro h1{font-family:'Dancing Script',cursive;font-size:2.4rem;color:#fff;text-shadow:0 0 12px rgba(255,220,150,.6);}
+#unlockBtn{background:linear-gradient(90deg,var(--gold-1),var(--gold-2));color:#4c1f86;padding:12px 18px;border:0;border-radius:12px;cursor:pointer;font-weight:600;}
 
 /* === VIDEOS === */
-
-/* Only global base for background layers */
-#firstVideo,
-#bgVideo {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 100vw;
-  height: 100vh;
-  transform: translate(-50%, -50%);
-  object-fit: cover;
-  object-position: center center;
-  background-color: #000;
-  transition: opacity 2s ease;
-  z-index: 1;
+#firstVideo,#bgVideo{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:100vw;height:100vh;object-fit:cover;object-position:center;background:#000;
+  transition:opacity 2s ease;z-index:1;opacity:0;pointer-events:none;
 }
 
-/* Intro (cloud) video */
-#firstVideo {
-  z-index: 5;
-  opacity: 0;
-  transition: opacity 1.5s ease;
-  pointer-events: none;
-}
+/* === SCROLL === */
+#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;z-index:3}
+#scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH) + var(--sheetH) + var(--rodH));}
 
-/* Background (heaven) video */
-#bgVideo {
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 2s ease;
-}
-
-/* All other inline scroll videos stay natural */
-#parchment video.mediaFrame {
-  position: static;
-  width: auto;
-  max-width: 90%;
-  max-height: 80vh;
-  object-fit: contain;
-  display: block;
-  margin: 28px auto;
-  background: #000;
-  border: 5px solid #dcbc6a;
-  border-radius: 16px;
-  box-shadow: 0 0 25px rgba(255,210,100,.4), 0 0 50px rgba(255,240,180,.2);
-}
-
-/* === GOLDEN VEIL (3s sweep left→right, fades out) === */
-#goldVeil{
-  position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;
-  background:
-    linear-gradient( to bottom, rgba(255,225,160,.85), rgba(255,205,120,.75), rgba(255,225,160,.85) ),
-    linear-gradient( 90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,245,200,.85) 8%,
-      rgba(255,250,220,1) 12%,
-      rgba(255,235,170,.85) 16%,
-      rgba(255,255,255,0) 24% );
-  background-size: 100% 100%, 300% 100%;
-  background-position: center center, -50% 0%;
-  filter: saturate(1.05) brightness(1.02);
-}
-.veil-show{ animation: veilSweep 3s ease-out forwards; }
-@keyframes veilSweep{
-  0%{opacity:1; background-position:center center, -60% 0%;}
-  60%{opacity:.9; background-position:center center, 40% 0%;}
-  100%{opacity:0; background-position:center center, 120% 0%;}
-}
-
-/* === BLACK FADE === */
-#blackout{
-  position:fixed; inset:0; background:#000; z-index:7; opacity:0; transition:opacity 2s ease;
-  pointer-events:none;
-}
-
-/* === SCROLL SCENE === */
-#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;perspective:1700px;z-index:3;}
-#scrollRig{
-  position:relative;width:var(--sheetW);margin:0 auto;
-  height:calc(var(--rodH) + var(--sheetH) + var(--rodH));
-  transform-style:preserve-3d;
-}
-
-/* RODS */
 #scrollTop,#scrollBottom{
-  position:absolute;left:50%;
-  width:calc(var(--sheetW) + 160px);
-  height:var(--rodH);
-  border-radius:999px;
-  background:
-    radial-gradient(65% 140% at 50% -30%, #ffffff 0%, transparent 60%),
-    linear-gradient(180deg, var(--gold-1) 0%, var(--gold-2) 40%, var(--gold-3) 80%, #fff0b6 100%);
-  box-shadow:
-    0 0 38px 10px rgba(255,220,150,.55),
-    inset 0 0 18px rgba(255,255,255,.9);
-  transform:translateX(-50%);opacity:0;z-index:4;
+  position:absolute;left:50%;width:calc(var(--sheetW) + 120px);height:var(--rodH);transform:translateX(-50%);
+  background:linear-gradient(180deg,var(--gold-1) 0%,var(--gold-2) 50%,var(--gold-3) 100%);
+  border-radius:999px;box-shadow:0 0 25px rgba(255,220,150,.5),inset 0 0 10px #fff;opacity:0;z-index:4;
 }
-#scrollTop{top:0;}
-#scrollTop::before,#scrollTop::after,
-#scrollBottom::before,#scrollBottom::after{
-  content:""; position:absolute; top:-2px;
-  width:var(--rodH); height:calc(var(--rodH) + 4px);
-  border-radius:50%;
-  background:radial-gradient(circle at 38% 38%, #fff, #f5e0a8 55%, #bd8f36 100%);
-  box-shadow:inset 0 0 12px rgba(0,0,0,.28), 0 0 18px rgba(255,220,150,.6);
-}
-#scrollTop::before{ left:-18px; }  #scrollTop::after{ right:-18px; }
-#scrollBottom{transform:translateX(-50%) translateY(0);}
-#scrollBottom::before{ left:-18px; } #scrollBottom::after{ right:-18px; }
+#scrollBottom{transform:translateX(-50%) translateY(var(--sheetH));}
 
-/* PARCHMENT (scroll container) */
-#parchmentWrap{
-  position:absolute;left:50%;top:calc(var(--rodH) - 25px);
-  transform:translateX(-50%);width:var(--sheetW);height:var(--sheetH);
-}
+#parchmentWrap{position:absolute;left:50%;top:calc(var(--rodH) - 20px);transform:translateX(-50%);
+width:var(--sheetW);height:var(--sheetH);}
 #parchment{
-  position:absolute;top:0;left:0;width:100%;height:0;
-  overflow-y:auto; overflow-x:hidden;
-  -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain;
-  border-left:22px solid #dcbc6a;border-right:22px solid #dcbc6a;border-radius:22px;
+  position:absolute;width:100%;height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
   background:linear-gradient(to bottom,#fffdf6 0%,#fff7e6 45%,#fbe9bf 100%);
-  box-shadow:0 0 90px 36px rgba(255,230,170,.9),0 0 120px rgba(255,200,120,.5),inset 0 0 36px rgba(255,255,255,.6);
-  color:var(--ink);text-align:left;padding:0 26px;opacity:0;transform-origin:top center;
-  animation:parchmentAura 6s ease-in-out infinite alternate paused;
+  border-left:16px solid #dcbc6a;border-right:16px solid #dcbc6a;border-radius:20px;
+  box-shadow:0 0 60px 25px rgba(255,230,170,.8),inset 0 0 20px rgba(255,255,255,.5);
+  color:var(--ink);padding:0 22px;opacity:0;
 }
-.opened #parchment{
-  height:var(--sheetH);
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-}
-#parchment .pad{padding:48px 10px 60px; max-width:min(64ch, 92%); margin:0 auto;}
-#parchment h2{
-  margin:0 0 12px;
-  font-family:'Playfair Display', serif;
-  font-weight:600;font-size:2rem;color:#5a2b86;text-align:center;
-  text-shadow:0 0 10px rgba(255,230,170,.5);
-  opacity:0;
-}
-#parchment p{
-  margin:14px 0;font-family:'Merriweather',serif;font-weight:400;
-  font-size:1.03rem;line-height:1.75;color:#49256f;opacity:0;word-break:break-word;
-}
+#parchment .pad{padding:36px 10px 50px;max-width:60ch;margin:0 auto;}
+#parchment h2{text-align:center;font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:12px;color:#5a2b86;}
+#parchment p{font-size:0.95rem;line-height:1.65;color:#49256f;margin:12px 0;}
 
-/* AURA */
-@keyframes parchmentAura{
-  0%  { box-shadow: 0 0 88px 36px rgba(255,230,170,.8), 0 0 130px rgba(255,195,110,.45), inset 0 0 28px rgba(255,255,255,.55); }
-  100%{ box-shadow: 0 0 112px 52px rgba(255,240,180,.95), 0 0 160px rgba(255,210,140,.65), inset 0 0 34px rgba(255,255,255,.7); }
-}
+#parchment::-webkit-scrollbar{width:0;}#parchment{-ms-overflow-style:none;scrollbar-width:none;}
 
-/* ANIMATIONS */
-@keyframes flyInRod{0%{transform:translateX(-50%) translateZ(-900px) scale(.25);opacity:0;}60%{transform:translateX(-50%) translateZ(-200px) scale(.8);opacity:1;}100%{transform:translateX(-50%) translateZ(80px) scale(1);opacity:1;}}
-@keyframes unrollDown{0%{height:0;opacity:0;}100%{height:var(--sheetH);opacity:1;}}
-@keyframes bottomRide{0%{transform:translateX(-50%) translateY(0);opacity:0;}100%{transform:translateX(-50%) translateY(var(--sheetH));opacity:1;}}
+/* Media frames */
+.mediaFrame{display:block;margin:24px auto;border:4px solid #dcbc6a;border-radius:14px;
+box-shadow:0 0 20px rgba(255,210,100,.4);max-width:90%;height:auto;}
+video.mediaFrame{object-fit:contain;background:#000;}
+
+/* Animations */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-
-.ready #scrollTop{animation:flyInRod 1.6s ease-out forwards;}
-.unrolling #parchment{animation:unrollDown 2.6s cubic-bezier(.22,.7,.1,1) forwards;}
-.unrolling #scrollBottom{animation:bottomRide 2.6s cubic-bezier(.22,.7,.1,1) forwards;}
-.opened #parchment{animation-play-state:running;}
-
-.hidden{display:none!important;}
-
-/* === HIDE SCROLLBAR === */
-#parchment::-webkit-scrollbar { width: 0px; }
-#parchment { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* === MEDIA (frames + spacing, natural ratios) === */
-.mediaFrame{
-  display:block;
-  margin: 28px auto;                   /* generous vertical space */
-  border: 5px solid #dcbc6a;           /* golden frame */
-  border-radius: 16px;
-  box-shadow: 0 0 25px rgba(255,210,100,.4), 0 0 50px rgba(255,240,180,.2);
-  max-width: 90%;
-  height: auto;
-  animation: fadeIn 1.2s ease forwards;
-}
-video.mediaFrame{
-  background:#000;
-  object-fit: contain;                 /* keep natural aspect ratio */
-  width: auto;                         /* do NOT force full width */
-  max-width: 90%;
-  max-height: 80vh;
-}
-img.mediaFrame{
-  width: auto;                         /* keep natural aspect ratio */
-  max-width: 90%;
-  height: auto;
-}
+.ready #scrollTop{animation:fadeIn 1.2s ease forwards;}
+.unrolling #parchment{animation:fadeIn 2s ease forwards;}
+.unrolling #scrollBottom{animation:fadeIn 2s ease forwards;}
+.opened #parchment{opacity:1;}
 </style>
+
 </head>
 <body>
 
@@ -482,12 +285,8 @@ img.mediaFrame{
   const startForm=document.getElementById('startForm');
   const passInput=document.getElementById('passInput');
   const err=document.getElementById('error');
-
-  const goldVeil=document.getElementById('goldVeil');
   const firstVideo=document.getElementById('firstVideo');
-  const blackout=document.getElementById('blackout');
   const bgVideo=document.getElementById('bgVideo');
-
   const rig=document.getElementById('scrollRig');
   const parchment=document.getElementById('parchment');
   const scrollBottom=document.getElementById('scrollBottom');
@@ -498,76 +297,63 @@ img.mediaFrame{
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
 
-    // --- START FIRST VIDEO IMMEDIATELY ---
+    // Always muted (Safari requires it for autoplay)
+    firstVideo.muted = true;
+    bgVideo.muted = true;
+
+    // Play first background video (clouds)
     firstVideo.currentTime = 0;
-    firstVideo.muted = false;
     firstVideo.playsInline = true;
-    firstVideo.play().catch(()=>{});
     firstVideo.style.opacity='1';
-    goldVeil.classList.add('veil-show');
+    firstVideo.play().catch(()=>{});
 
-    // --- WHEN FIRST VIDEO ENDS ---
-    firstVideo.onended = () => {
-      // fade to black
-      blackout.style.opacity='1';
-
+    // When first video ends, fade to bg-video
+    firstVideo.onended = ()=>{
       setTimeout(()=>{
         firstVideo.style.opacity='0';
-        blackout.style.opacity='0';
-
-        // wait 5 seconds before showing bg-video
-        setTimeout(()=>{
-          bgVideo.currentTime = 0;
-          bgVideo.playsInline = true;
-          bgVideo.muted = false;
-          bgVideo.play().catch(()=>{});
-          bgVideo.style.opacity='1';
-          triggerScroll();
-        },5000);
-      },2000);
+        bgVideo.style.opacity='1';
+        bgVideo.currentTime=0;
+        bgVideo.playsInline=true;
+        bgVideo.play().catch(()=>{});
+        startScrollScene();
+      },3000);
     };
   }
 
-  function triggerScroll(){
+  function startScrollScene(){
     rig.classList.add('ready');
     setTimeout(()=>{
       rig.classList.add('unrolling');
       setTimeout(()=>{
         rig.classList.add('opened');
-        parchment.style.opacity='1';
         parchment.style.height='var(--sheetH)';
         parchment.style.overflowY='auto';
-        parchment.style.touchAction='pan-y';
-
-        h2.style.animation='fadeIn 1100ms ease forwards';
-        let delay=350;
-        const paras=parchment.querySelectorAll('p');
+        parchment.style.opacity='1';
+        h2.style.animation='fadeIn 1.2s ease forwards';
+        let delay=300;
         paras.forEach(p=>{
-          p.style.animation=`fadeIn 1100ms ease forwards`;
+          p.style.animation='fadeIn 1.2s ease forwards';
           p.style.animationDelay=`${delay}ms`;
-          delay+=250;
+          delay+=200;
         });
-
         parchment.addEventListener('scroll',()=>{
           const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
           scrollBottom.style.opacity = nearBottom ? '1' : '0';
         });
-      },2700);
-    },1700);
+      },2000);
+    },1500);
   }
 
-  startForm.addEventListener('submit', (e)=>{
+  startForm.addEventListener('submit',(e)=>{
     e.preventDefault();
-    const val = (passInput.value || '').trim().toLowerCase();
-    if(val === 'malik'){
-      err.style.opacity = 0;
+    const val=(passInput.value||'').trim().toLowerCase();
+    if(val==='malik'){
+      err.style.opacity=0;
       startExperience();
     }else{
-      err.style.opacity = 1;
+      err.style.opacity=1;
       startForm.classList.add('shake');
-      setTimeout(()=>startForm.classList.remove('shake'), 280);
-      passInput.focus();
-      passInput.select();
+      setTimeout(()=>startForm.classList.remove('shake'),280);
     }
   });
 })();
