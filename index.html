@@ -168,60 +168,31 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 #parchment::-webkit-scrollbar-thumb{background:#c9a84f;border-radius:4px;}
 #parchment::-webkit-scrollbar-track{background:rgba(0,0,0,.1);}
 
-/* === FINAL FIX: SCROLLING RESTORE === */
-#scene, #scrollRig {
-  pointer-events: auto !important;
-}
-
+/* === FINAL FIX: SCROLL INSIDE PARCHMENT === */
 #parchment {
-  overflow-y: scroll !important;
+  overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
-  height: var(--sheetH) !important;
-  max-height: var(--sheetH) !important;
+  height: var(--sheetH);
+  max-height: var(--sheetH);
   pointer-events: auto !important;
 }
 
-/* Make scrollbar visible */
-#parchment::-webkit-scrollbar {
-  width: 10px;
-}
-#parchment::-webkit-scrollbar-thumb {
-  background: linear-gradient(var(--gold-2), var(--gold-3));
-  border-radius: 6px;
-}
-#parchment::-webkit-scrollbar-track {
-  background: rgba(0,0,0,.25);
-  border-radius: 6px;
+#scene, #scrollRig {
+  pointer-events: none;
 }
 
-/* Prevent whole page from moving */
+#parchment * {
+  pointer-events: auto;
+}
+
 html, body {
-  overflow: hidden !important;
+  overflow: hidden !important; /* Prevent entire page from moving */
   height: 100%;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
-/* === iOS Safari scroll fix for #parchment === */
-#parchment {
-  position: relative !important;
-  transform: translateZ(0) !important;
-  will-change: transform !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  touch-action: pan-y !important;
-  height: var(--sheetH) !important;
-  max-height: var(--sheetH) !important;
-  pointer-events: auto !important;
-  z-index: 100; /* ensure it’s above any fixed/transform layers */
-}
-
-#scrollRig, #scene {
-  transform: none !important;
-  perspective: none !important;
-}
-  
 
 </style>
 </head>
@@ -493,8 +464,6 @@ html, body {
     else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
   });
 })();
-
-  
 </script>
 
 </body>
