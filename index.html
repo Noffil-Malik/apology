@@ -89,26 +89,41 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 #scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH)*2 + var(--sheetH));transform-style:preserve-3d;}
 
 /* RODS */
+/* RODS (with round caps restored and slimmer width) */
 #scrollTop,#scrollBottom{
   position:absolute;left:50%;
-  width:calc(var(--sheetW) + 160px);
-  height:var(--rodH);
+  width:calc(var(--sheetW) + 80px);   /* reduced width */
+  height:calc(var(--rodH) * 0.85);    /* slightly slimmer rods */
   border-radius:999px;
   background:
-    radial-gradient(65% 140% at 50% -30%, #ffffff 0%, transparent 60%),
-    linear-gradient(180deg,var(--gold-1)0%,var(--gold-2)40%,var(--gold-3)80%,#fff0b6 100%);
-  box-shadow:0 0 24px 8px rgba(255,220,150,.5),inset 0 0 8px rgba(255,255,255,.8);
-  transform:translateX(-50%);opacity:0;z-index:4;
+    radial-gradient(60% 130% at 50% -30%, #ffffff 0%, transparent 60%),
+    linear-gradient(180deg,var(--gold-1) 0%,var(--gold-2) 45%,var(--gold-3) 85%,#fff0b6 100%);
+  box-shadow:
+    0 0 30px 8px rgba(255,220,150,.55),
+    inset 0 0 12px rgba(255,255,255,.8);
+  transform:translateX(-50%);
+  opacity:0;
+  z-index:4;
 }
 #scrollTop{top:0;}
 #scrollBottom{transform:translateX(-50%) translateY(0);}
+
+/* rounded golden end caps */
 #scrollTop::before,#scrollTop::after,#scrollBottom::before,#scrollBottom::after{
-  content:"";position:absolute;top:-2px;width:var(--rodH);height:calc(var(--rodH)+4px);border-radius:50%;
-  background:radial-gradient(circle at 38% 38%,#fff,#f5e0a8 55%,#bd8f36 100%);
-  box-shadow:inset 0 0 12px rgba(0,0,0,.28),0 0 18px rgba(255,220,150,.6);
+  content:"";
+  position:absolute;
+  top:-2px;
+  width:calc(var(--rodH)*0.9);
+  height:calc(var(--rodH)*0.9 + 4px);
+  border-radius:50%;
+  background:radial-gradient(circle at 38% 38%, #fff, #f5e0a8 55%, #bd8f36 100%);
+  box-shadow:inset 0 0 10px rgba(0,0,0,.25),0 0 14px rgba(255,220,150,.55);
 }
-#scrollTop::before{left:-18px;}#scrollTop::after{right:-18px;}
-#scrollBottom::before{left:-18px;}#scrollBottom::after{right:-18px;}
+#scrollTop::before{left:-20px;} 
+#scrollTop::after{right:-20px;}
+#scrollBottom::before{left:-20px;}
+#scrollBottom::after{right:-20px;}
+
 
 /* PARCHMENT */
 #parchmentWrap{position:absolute;left:50%;top:calc(var(--rodH)-25px);transform:translateX(-50%);width:var(--sheetW);height:var(--sheetH);}
