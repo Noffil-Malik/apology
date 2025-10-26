@@ -477,6 +477,21 @@ html, body {
     else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
   });
 
+    // --- iPhone Safari dynamic height fix ---
+  const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isiOS) {
+    function fixParchmentHeight() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      parchment.style.height = `calc(var(--vh) * 78)`;
+      parchment.style.maxHeight = `calc(var(--vh) * 78)`;
+    }
+    fixParchmentHeight();
+    window.addEventListener('resize', fixParchmentHeight);
+  }
+
+})();
+
 
 
   
