@@ -168,47 +168,29 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 #parchment::-webkit-scrollbar-thumb{background:#c9a84f;border-radius:4px;}
 #parchment::-webkit-scrollbar-track{background:rgba(0,0,0,.1);}
 
-/* === FINAL FIX: SCROLL INSIDE PARCHMENT === */
+/* === ABSOLUTE FIX FOR PARCHMENT SCROLLING === */
 #parchment {
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
-  height: var(--sheetH);
-  max-height: var(--sheetH);
-  pointer-events: auto !important;
-}
-
-#scene, #scrollRig {
-  pointer-events: none;
-}
-
-#parchment * {
-  pointer-events: auto;
-}
-
-html, body {
-  overflow: hidden !important; /* Prevent entire page from moving */
-  height: 100%;
-  touch-action: none;
-}
-
-/* === FINAL FIX: SCROLLING RESTORE === */
-#scene, #scrollRig {
-  pointer-events: auto !important;
-}
-
-#parchment {
+  position: relative;
   overflow-y: scroll !important;
   -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
   height: var(--sheetH) !important;
   max-height: var(--sheetH) !important;
   pointer-events: auto !important;
+  z-index: 99;
 }
 
-/* Make scrollbar visible */
+/* Ensure outer containers don’t block input */
+#scene, #scrollRig, #parchmentWrap {
+  pointer-events: none !important;
+}
+#parchment, #parchment * {
+  pointer-events: auto !important;
+}
+
+/* Scrollbar style */
 #parchment::-webkit-scrollbar {
   width: 10px;
 }
@@ -221,13 +203,13 @@ html, body {
   border-radius: 6px;
 }
 
-/* Prevent whole page from moving */
+/* Prevent body scroll */
 html, body {
   overflow: hidden !important;
   height: 100%;
-  touch-action: manipulation;
+  touch-action: none !important;
 }
-  
+
   
 
 </style>
