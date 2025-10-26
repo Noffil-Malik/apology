@@ -476,19 +476,6 @@ html, body {
   });
 })();
 
-  // --- SAFARI SCROLL FIX ---
-function enableScrollAfterAnimation() {
-  const parchment = document.getElementById("parchment");
-  parchment.style.overflowY = "auto";
-  parchment.style.webkitOverflowScrolling = "touch";
-  parchment.style.touchAction = "pan-y";
-  parchment.style.pointerEvents = "auto";
-  parchment.style.contain = "paint layout style";
-}
-
-// Re-enable scroll 3 seconds after unroll finishes
-setTimeout(enableScrollAfterAnimation, 12000);
-
   
 </script>
 
