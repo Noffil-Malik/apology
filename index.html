@@ -168,29 +168,22 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 #parchment::-webkit-scrollbar-thumb{background:#c9a84f;border-radius:4px;}
 #parchment::-webkit-scrollbar-track{background:rgba(0,0,0,.1);}
 
-/* === ABSOLUTE FIX FOR PARCHMENT SCROLLING === */
+/* === FINAL FIX: SCROLLING RESTORE === */
+#scene, #scrollRig {
+  pointer-events: auto !important;
+}
+
 #parchment {
-  position: relative;
   overflow-y: scroll !important;
   -webkit-overflow-scrolling: touch !important;
-  touch-action: pan-y !important;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
   height: var(--sheetH) !important;
   max-height: var(--sheetH) !important;
   pointer-events: auto !important;
-  z-index: 99;
 }
 
-/* Ensure outer containers don’t block input */
-#scene, #scrollRig, #parchmentWrap {
-  pointer-events: none !important;
-}
-#parchment, #parchment * {
-  pointer-events: auto !important;
-}
-
-/* Scrollbar style */
+/* Make scrollbar visible */
 #parchment::-webkit-scrollbar {
   width: 10px;
 }
@@ -203,11 +196,11 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   border-radius: 6px;
 }
 
-/* Prevent body scroll */
+/* Prevent whole page from moving */
 html, body {
   overflow: hidden !important;
   height: 100%;
-  touch-action: none !important;
+  touch-action: manipulation;
 }
 
   
