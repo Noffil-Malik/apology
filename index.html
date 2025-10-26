@@ -420,6 +420,12 @@ bgVideo.play().then(()=>{
             setTimeout(()=>{
               rig.classList.add('opened');
               parchment.style.opacity='1';
+
+              parchment.style.pointerEvents='auto';
+parchment.style.overflowY='scroll';
+parchment.scrollTo(0, 1); // activates scroll region
+setTimeout(()=>parchment.scrollTo(0,0),100); // resets position
+
               parchment.style.height='var(--sheetH)';
               parchment.style.overflowY='auto';
 
