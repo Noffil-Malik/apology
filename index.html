@@ -148,8 +148,12 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 .ready #scrollTop{animation:flyInRod 1.6s ease-out forwards;}
-.unrolling #parchment{animation:unrollDown 2.6s cubic-bezier(.22,.7,.1,1) forwards;}
-.unrolling #scrollBottom{animation:bottomRide 2.6s cubic-bezier(.22,.7,.1,1) forwards;}
+/* === FIX 1A: synchronize parchment + bottom rod animation speed === */
+.unrolling #parchment,
+.unrolling #scrollBottom {
+  animation-duration: 2.2s !important;           /* same duration for both */
+  animation-timing-function: ease-in-out !important; /* smoother match */
+}
 .opened #parchment{animation-play-state:running;}
 
 .hidden{display:none!important;}
