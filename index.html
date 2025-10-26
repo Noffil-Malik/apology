@@ -176,6 +176,35 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 
 /* === FINAL FIX: SCROLL INSIDE PARCHMENT === */
 
+  /* === FIX: SCROLL INSIDE PARCHMENT (FINAL CLEAN VERSION) === */
+#parchment {
+  overflow-y: auto;                 /* enable scrolling inside parchment */
+  -webkit-overflow-scrolling: touch; /* smooth iOS flick scroll */
+  touch-action: pan-y;              /* allow vertical swiping */
+  height: var(--sheetH);
+  max-height: var(--sheetH);
+  transform: translateZ(0);         /* create a new layer for iOS Safari */
+  will-change: transform;
+  position: relative;
+  pointer-events: auto;
+}
+
+#scene, #scrollRig {
+  perspective: 1700px;
+  transform-style: preserve-3d;
+  pointer-events: none;             /* block gestures here */
+}
+
+#parchment * {
+  pointer-events: auto;             /* allow links / media inside parchment */
+}
+
+html, body {
+  overflow: hidden;                 /* prevent the whole page from scrolling */
+  height: 100%;
+  touch-action: none;               /* block general page swiping */
+}
+
 
 
 </style>
