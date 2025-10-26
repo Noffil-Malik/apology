@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Cinematic Cloud Transition Scroll</title>
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@300;400;700&display=swap');
-
 :root{
   --gold-1:#fff6cf;
   --gold-2:#f4d56a;
@@ -15,14 +13,20 @@
   --ink:#5a2b86;
   --rodH:60px;
   --sheetW:min(68vw,850px);
-  --sheetH:min(78vh,1080px);
+  --sheetH:min(78vh,1080px); /* Default, will be overridden by JS for iOS */
 }
-
 *{box-sizing:border-box;}
-html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;overflow:hidden;background:#000}
+html,body{
+  height:100%;
+  margin:0;
+  font-family:'Merriweather',serif;
+  color:#fff;
+  background:#000;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
 ::selection{background:rgba(250,224,168,.6)}
-body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-
+body{min-height:100vh;}
 #intro{
   position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:24px;text-align:center;z-index:10;transition:opacity .8s ease;
@@ -65,7 +69,6 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 @keyframes shake{
   0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}
 }
-
 /* === VIDEOS === */
 #firstVideo,#bgVideo{
   position:fixed;top:50%;left:50%;width:100vw;height:100vh;
@@ -76,7 +79,6 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 #firstVideo{z-index:5;opacity:0;transition:opacity 1.5s ease;pointer-events:none;}
 #bgVideo{z-index:1;opacity:0;transition:opacity 2s ease;}
 #blackout{position:fixed;inset:0;background:#000;z-index:7;opacity:0;transition:opacity 2s ease;pointer-events:none;}
-
 /* === SCROLL === */
 #scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;perspective:1700px;z-index:3;}
 #scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH)*2 + var(--sheetH));transform-style:preserve-3d;}
@@ -124,10 +126,11 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
   box-shadow:0 0 25px rgba(255,210,100,.4),0 0 50px rgba(255,240,180,.2);max-width:90%;height:auto;animation:fadeIn 1.2s ease forwards;}
 video.mediaFrame{background:#000;object-fit:contain;width:auto;max-width:90%;max-height:80vh;}
 img.mediaFrame{width:auto;max-width:90%;height:auto;}
+/* Hide the intro visually after opacity */
+#intro.hidden{display:none;}
 </style>
 </head>
 <body>
-
 <section id="intro">
   <div class="gate">
     <h1>A Magical Surprise</h1>
@@ -140,7 +143,6 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
     <div id="error">That didn’t match. Try again.</div>
   </div>
 </section>
-
 <!-- VIDEOS -->
 <video id="firstVideo" muted playsinline preload="auto">
   <source src="first-video.mp4" type="video/mp4" />
@@ -149,28 +151,31 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 <video id="bgVideo" muted playsinline preload="auto">
   <source src="bg-video.mp4" type="video/mp4" />
 </video>
-
 <!-- SCROLL CONTENT -->
 <section id="scene">
   <div id="scrollRig">
     <div id="scrollTop"></div>
     <div id="parchmentWrap">
       <div id="parchment"><div class="pad">
-
-        <!-- YOUR FULL TEXT & MEDIA (UNCHANGED) -->
-        <!-- keep everything you already had here exactly as it is -->
-        <!-- shortened for readability -->
         <h2>Hey Ifrah,</h2>
         <p>The last time we met...</p>
         <!-- etc... -->
-
       </div></div>
     </div>
     <div id="scrollBottom"></div>
   </div>
 </section>
-
 <script>
+// --- DYNAMIC HEIGHT PATCH FOR SAFARI & MOBILE ---
+function setParchmentHeight() {
+  // Use 78% of the viewport, capped at 1080px, fixes iOS viewport bugs
+  var vh = Math.max(window.innerHeight, document.documentElement.clientHeight);
+  document.documentElement.style.setProperty('--sheetH', Math.min(vh * 0.78, 1080) + 'px');
+}
+window.addEventListener('resize', setParchmentHeight);
+window.addEventListener('orientationchange', setParchmentHeight);
+setParchmentHeight();
+
 (function(){
   const intro=document.getElementById('intro');
   const startForm=document.getElementById('startForm');
@@ -184,20 +189,28 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   const h2=parchment.querySelector('h2');
   const paras=parchment.querySelectorAll('p');
 
+  // Utility: ensure videos are ready for iOS
+  function unlockVideosForiOS() {
+    // Trigger play/pause on user gesture
+    [firstVideo, bgVideo].forEach((v)=>{
+      v.load();
+      try {
+        v.play().then(()=>v.pause()).catch(()=>{});
+      } catch(e){}
+    });
+  }
+
   function startExperience(){
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
 
-    // Unlock Safari autoplay
-    firstVideo.play().then(()=>firstVideo.pause());
-    bgVideo.play().then(()=>bgVideo.pause());
+    unlockVideosForiOS();
 
-    // Play first video
+    // First video must be played on gesture for iOS
     firstVideo.currentTime=0;
     firstVideo.play().catch(()=>{});
     firstVideo.style.opacity='1';
 
-    // Switch to bg video
     firstVideo.onended=()=>{
       blackout.style.opacity='1';
       setTimeout(()=>{
@@ -205,6 +218,7 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
         firstVideo.pause();
         blackout.style.opacity='0';
         bgVideo.currentTime=0;
+        // Required for iOS: play on gesture chain
         bgVideo.play().catch(()=>{});
         bgVideo.style.opacity='1';
         setTimeout(triggerScroll,3000);
