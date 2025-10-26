@@ -169,14 +169,18 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 #parchment::-webkit-scrollbar-track{background:rgba(0,0,0,.1);}
 
   /* === PARCHMENT BOTTOM ATTACH FIX === */
+/* === FIX: PARCHMENT ATTACHMENT + BOTTOM ROD RESTORE === */
 #parchmentWrap {
-  height: calc(var(--sheetH) + var(--rodH) * 0.85);
+  height: calc(var(--sheetH) + var(--rodH));
 }
 
 #scrollBottom {
-  top: auto;
   bottom: 0;
+  top: auto !important;
+  transform: translateX(-50%) translateY(var(--sheetH)) !important;
+  opacity: 1;
 }
+
 
   
 </style>
