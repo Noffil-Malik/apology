@@ -400,24 +400,39 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   }
 
   function transitionToBG(){
-    // prevent multiple triggers
-    firstVideo.onended = null;
+  firstVideo.onended = null;
+  blackout.style.opacity = '1';
 
-    // fade to black
-    blackout.style.opacity='1';
-    setTimeout(()=>{
-      // hide first video, show bg
-      firstVideo.style.opacity='0';
-      blackout.style.opacity='0';
+  setTimeout(()=>{
+    // Hide first video
+    firstVideo.style.opacity = '0';
+    firstVideo.pause();
+    firstVideo.currentTime = 0;
 
-      bgVideo.currentTime = 0;
-      bgVideo.play().catch(()=>{});
-      bgVideo.style.opacity='1';
+    // Fade back in
+    blackout.style.opacity = '0';
 
-      // after 3s delay, bring in scroll
-      setTimeout(triggerScroll, 3000);
-    },2000); // 2s blackout
-  }
+    // Force reload and play bgVideo safely
+    bgVideo.load();
+    bgVideo.muted = true;
+    bgVideo.play().then(()=>{
+      bgVideo.style.opacity = '1';
+    }).catch(err=>{
+      console.warn("Autoplay blocked:", err);
+      // Safari fallback: user gesture handler
+      const tapHandler = () => {
+        bgVideo.play();
+        bgVideo.style.opacity = '1';
+        window.removeEventListener('touchstart', tapHandler);
+      };
+      window.addEventListener('touchstart', tapHandler);
+    });
+
+    // After 3s, bring scroll
+    setTimeout(triggerScroll, 3000);
+  }, 2000);
+}
+
 
   function triggerScroll(){
     rig.classList.add('ready');
