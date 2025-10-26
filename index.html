@@ -6,7 +6,7 @@
 <title>Cinematic Cloud Transition Scroll</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@400;600&family=Merriweather:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@300;400;700&display=swap');
 
 /* === THEME & DIMENSIONS === */
 :root{
@@ -14,9 +14,9 @@
   --gold-2:#f4d56a;
   --gold-3:#d4a93c;
   --ink:#5a2b86;
-  --rodH:45px;
-  --sheetW:min(62vw,780px);
-  --sheetH:min(72vh,980px);
+  --rodH:60px;
+  --sheetW:min(68vw,850px);
+  --sheetH:min(78vh,1080px);
 }
 
 /* === BASE === */
@@ -25,63 +25,88 @@ html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;overf
 ::selection{background:rgba(250,224,168,.6)}
 body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
-/* === INTRO === */
+/* === INTRO (original restored) === */
 #intro{
   position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 50% 10%,rgba(255,220,170,.25),transparent 70%),linear-gradient(180deg,#24113f 0%, #401a72 40%, #6a0dad 100%);
-  z-index:10;transition:opacity .8s ease;
+  padding:24px;text-align:center;z-index:10;transition:opacity .8s ease;
+  background:
+    radial-gradient(1400px 700px at 50% 0%, rgba(255,220,170,.25), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg,#24113f 0%, #401a72 40%, #6a0dad 100%);
 }
-#intro .gate{width:min(92vw,520px);padding:26px;border-radius:18px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);text-align:center}
-#intro h1{font-family:'Dancing Script',cursive;font-size:2.6rem;color:#fff;text-shadow:0 0 14px rgba(255,220,150,.55);}
-#unlockBtn{background:linear-gradient(90deg,var(--gold-1),var(--gold-2));color:#4c1f86;border:0;padding:14px 18px;border-radius:12px;cursor:pointer;font-weight:600}
+#intro .gate{
+  width:min(92vw,520px);
+  background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+  backdrop-filter: blur(10px);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:18px;
+  padding:28px 22px 24px;
+  box-shadow:0 10px 60px rgba(0,0,0,.35), 0 0 40px rgba(255,220,150,.15);
+}
+#intro h1{
+  font-family:'Dancing Script',cursive;
+  font-size:2.6rem; margin:0 0 6px; color:#fff;
+  text-shadow:0 0 16px rgba(255,220,150,.55);
+}
+#intro p.sub{margin:0 0 18px; color:rgba(255,255,255,.86); font-size:1.02rem;}
+.formRow{display:flex; gap:10px; align-items:center; justify-content:center;}
+#passInput{
+  flex:1; min-width:0; font-size:1.05rem; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.35);
+  background:rgba(0,0,0,.25); color:#fff; outline:none; box-shadow:inset 0 0 0 9999px rgba(255,255,255,.04);
+}
+#unlockBtn{
+  border:0; padding:14px 18px; border-radius:12px; cursor:pointer;
+  background:linear-gradient(90deg,var(--gold-1),var(--gold-2)); color:#4c1f86;
+  font-size:1.02rem; font-weight:600; box-shadow:0 0 18px rgba(255,220,150,.45);
+  transition:transform .15s ease, filter .2s ease;
+}
+#unlockBtn:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+#hint{margin-top:10px; font-size:.95rem; color:#ffdca0; opacity:.9;}
+#error{margin-top:10px; font-size:.95rem; color:#ffb3b3; opacity:0; transition:opacity .2s ease;}
+.shake{ animation:shake .25s linear 1; }
+@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}}
 
 /* === VIDEOS === */
 #firstVideo,#bgVideo{
-  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:100vw;height:100vh;object-fit:cover;object-position:center;
-  background:#000;transition:opacity 2s ease;z-index:1;opacity:0;pointer-events:none;
+  position:fixed;top:50%;left:50%;width:100vw;height:100vh;
+  transform:translate(-50%,-50%);object-fit:cover;object-position:center;
+  background-color:#000;transition:opacity 2s ease;z-index:1;opacity:0;
 }
 
 /* === SCROLL === */
-#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:8vh;z-index:3}
-#scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH) + var(--sheetH) + var(--rodH));}
+#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;perspective:1700px;z-index:3;}
+#scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH) + var(--sheetH) + var(--rodH));transform-style:preserve-3d;}
 #scrollTop,#scrollBottom{
-  position:absolute;left:50%;width:calc(var(--sheetW) + 140px);height:var(--rodH);
-  transform:translateX(-50%);border-radius:999px;
-  background:linear-gradient(180deg,var(--gold-1) 0%,var(--gold-2) 50%,var(--gold-3) 100%);
-  box-shadow:0 0 28px rgba(255,220,150,.55),inset 0 0 12px #fff;
-  opacity:0;z-index:4;
+  position:absolute;left:50%;width:calc(var(--sheetW) + 160px);height:var(--rodH);
+  border-radius:999px;background:linear-gradient(180deg,var(--gold-1),var(--gold-2) 50%,var(--gold-3) 100%);
+  box-shadow:0 0 38px 10px rgba(255,220,150,.55),inset 0 0 18px rgba(255,255,255,.9);
+  transform:translateX(-50%);opacity:0;z-index:4;
 }
-#scrollBottom{transform:translateX(-50%) translateY(var(--sheetH));}
-
-#parchmentWrap{position:absolute;left:50%;top:calc(var(--rodH) - 22px);transform:translateX(-50%);
-width:var(--sheetW);height:var(--sheetH);}
+#scrollTop{top:0;} #scrollBottom{transform:translateX(-50%) translateY(0);}
+#parchmentWrap{position:absolute;left:50%;top:calc(var(--rodH) - 25px);transform:translateX(-50%);width:var(--sheetW);height:var(--sheetH);}
 #parchment{
-  position:absolute;width:100%;height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  position:absolute;top:0;left:0;width:100%;height:0;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;
+  border-left:22px solid #dcbc6a;border-right:22px solid #dcbc6a;border-radius:22px;
   background:linear-gradient(to bottom,#fffdf6 0%,#fff7e6 45%,#fbe9bf 100%);
-  border-left:18px solid #dcbc6a;border-right:18px solid #dcbc6a;border-radius:20px;
-  box-shadow:0 0 70px 30px rgba(255,230,170,.8),inset 0 0 30px rgba(255,255,255,.5);
-  color:var(--ink);padding:0 22px;opacity:0;
+  box-shadow:0 0 90px 36px rgba(255,230,170,.9),inset 0 0 36px rgba(255,255,255,.6);
+  color:var(--ink);text-align:left;padding:0 26px;opacity:0;
 }
-#parchment .pad{padding:40px 10px 60px;max-width:60ch;margin:0 auto;}
-#parchment h2{text-align:center;font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:12px;color:#5a2b86;}
-#parchment p{font-size:0.96rem;line-height:1.7;color:#49256f;margin:14px 0;}
+#parchment .pad{padding:48px 10px 60px; max-width:min(64ch, 92%); margin:0 auto;}
+#parchment h2{margin:0 0 12px;font-family:'Playfair Display',serif;font-weight:600;font-size:2rem;color:#5a2b86;text-align:center;}
+#parchment p{margin:14px 0;font-family:'Merriweather',serif;font-weight:400;font-size:1.03rem;line-height:1.75;color:#49256f;word-break:break-word;}
 
-#parchment::-webkit-scrollbar{width:0;}#parchment{-ms-overflow-style:none;scrollbar-width:none;}
+#parchment::-webkit-scrollbar {width:0px;} #parchment {scrollbar-width:none;}
 
-.mediaFrame{display:block;margin:28px auto;border:4px solid #dcbc6a;border-radius:14px;
-box-shadow:0 0 22px rgba(255,210,100,.4);max-width:90%;height:auto;}
-video.mediaFrame{object-fit:contain;background:#000;}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.ready #scrollTop{animation:fadeIn 1.4s ease forwards;}
-.unrolling #parchment{animation:fadeIn 2.4s ease forwards;}
-.unrolling #scrollBottom{animation:fadeIn 2.4s ease forwards;}
-.opened #parchment{opacity:1;}
+/* === MEDIA === */
+.mediaFrame{display:block;margin:28px auto;border:5px solid #dcbc6a;border-radius:16px;
+box-shadow:0 0 25px rgba(255,210,100,.4);max-width:90%;height:auto;}
+video.mediaFrame{background:#000;object-fit:contain;width:auto;max-width:90%;max-height:80vh;}
+img.mediaFrame{width:auto;max-width:90%;height:auto;}
 </style>
 </head>
 <body>
 
-<!-- INTRO (unchanged) -->
+<!-- INTRO -->
 <section id="intro">
   <div class="gate">
     <h1>A Magical Surprise</h1>
@@ -99,6 +124,7 @@ video.mediaFrame{object-fit:contain;background:#000;}
 <video id="firstVideo" playsinline muted preload="auto">
   <source src="first-video.mp4" type="video/mp4" />
 </video>
+<div id="blackout" style="position:fixed;inset:0;background:#000;z-index:7;opacity:0;transition:opacity 2s ease;"></div>
 <video id="bgVideo" playsinline muted preload="auto" loop>
   <source src="bg-video.mp4" type="video/mp4" />
 </video>
@@ -265,8 +291,9 @@ video.mediaFrame{object-fit:contain;background:#000;}
 
 
           <p><br> - N. M. </p>
-
-      </div></div>
+          
+        </div>
+      </div>
     </div>
     <div id="scrollBottom"></div>
   </div>
@@ -279,35 +306,31 @@ video.mediaFrame{object-fit:contain;background:#000;}
   const passInput=document.getElementById('passInput');
   const err=document.getElementById('error');
   const firstVideo=document.getElementById('firstVideo');
+  const blackout=document.getElementById('blackout');
   const bgVideo=document.getElementById('bgVideo');
   const rig=document.getElementById('scrollRig');
   const parchment=document.getElementById('parchment');
   const scrollBottom=document.getElementById('scrollBottom');
-  const h2=parchment.querySelector('h2');
-  const paras=parchment.querySelectorAll('p');
 
   function startExperience(){
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
 
-    // Keep muted permanently (autoplay-safe)
     firstVideo.muted=true;
     bgVideo.muted=true;
-
-    // Play first video
     firstVideo.currentTime=0;
     firstVideo.style.opacity='1';
     firstVideo.play().catch(()=>{});
 
-    // When first ends, fade & start bg video after 5s
     firstVideo.onended=()=>{
+      blackout.style.opacity='1';
       setTimeout(()=>{
-        firstVideo.style.opacity='0';
+        blackout.style.opacity='0';
         bgVideo.currentTime=0;
         bgVideo.style.opacity='1';
         bgVideo.play().catch(()=>{});
         startScroll();
-      },5000);
+      },2000);
     };
   }
 
@@ -317,16 +340,9 @@ video.mediaFrame{object-fit:contain;background:#000;}
       rig.classList.add('unrolling');
       setTimeout(()=>{
         rig.classList.add('opened');
+        parchment.style.opacity='1';
         parchment.style.height='var(--sheetH)';
         parchment.style.overflowY='auto';
-        parchment.style.opacity='1';
-        h2.style.animation='fadeIn 1.2s ease forwards';
-        let delay=350;
-        paras.forEach(p=>{
-          p.style.animation='fadeIn 1.2s ease forwards';
-          p.style.animationDelay=`${delay}ms`;
-          delay+=200;
-        });
         parchment.addEventListener('scroll',()=>{
           const nearBottom=parchment.scrollTop+parchment.clientHeight>=parchment.scrollHeight-10;
           scrollBottom.style.opacity=nearBottom?'1':'0';
@@ -338,14 +354,8 @@ video.mediaFrame{object-fit:contain;background:#000;}
   startForm.addEventListener('submit',e=>{
     e.preventDefault();
     const val=(passInput.value||'').trim().toLowerCase();
-    if(val==='malik'){
-      err.style.opacity=0;
-      startExperience();
-    }else{
-      err.style.opacity=1;
-      startForm.classList.add('shake');
-      setTimeout(()=>startForm.classList.remove('shake'),280);
-    }
+    if(val==='malik'){err.style.opacity=0;startExperience();}
+    else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
   });
 })();
 </script>
