@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Cinematic Cloud Transition Scroll</title>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@300;400;700&display=swap');
 :root{
@@ -13,7 +14,7 @@
   --ink:#5a2b86;
   --rodH:60px;
   --sheetW:min(68vw,850px);
-  --sheetH:min(78vh,1080px); /* Default, will be overridden by JS for iOS */
+  --sheetH:min(78vh,1080px); /* Default, JS refines on mobile */
 }
 *{box-sizing:border-box;}
 html,body{
@@ -25,8 +26,8 @@ html,body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
-::selection{background:rgba(250,224,168,.6)}
 body{min-height:100vh;}
+::selection{background:rgba(250,224,168,.6)}
 #intro{
   position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:24px;text-align:center;z-index:10;transition:opacity .8s ease;
@@ -69,6 +70,7 @@ body{min-height:100vh;}
 @keyframes shake{
   0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}
 }
+#intro.hidden{display:none;}
 /* === VIDEOS === */
 #firstVideo,#bgVideo{
   position:fixed;top:50%;left:50%;width:100vw;height:100vh;
@@ -126,8 +128,6 @@ body{min-height:100vh;}
   box-shadow:0 0 25px rgba(255,210,100,.4),0 0 50px rgba(255,240,180,.2);max-width:90%;height:auto;animation:fadeIn 1.2s ease forwards;}
 video.mediaFrame{background:#000;object-fit:contain;width:auto;max-width:90%;max-height:80vh;}
 img.mediaFrame{width:auto;max-width:90%;height:auto;}
-/* Hide the intro visually after opacity */
-#intro.hidden{display:none;}
 </style>
 </head>
 <body>
@@ -144,12 +144,13 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   </div>
 </section>
 <!-- VIDEOS -->
-<video id="firstVideo" muted playsinline preload="auto">
-  <source src="first-video.mp4" type="video/mp4" />
+<video id="firstVideo" autoplay muted playsinline preload="auto" poster="first-video-poster.jpg" style="background:#000">
+  <source src="first-video.mp4#t=0.1" type="video/mp4" />
+  <!-- fallback image -->
 </video>
 <div id="blackout"></div>
-<video id="bgVideo" muted playsinline preload="auto">
-  <source src="bg-video.mp4" type="video/mp4" />
+<video id="bgVideo" autoplay muted playsinline preload="auto" poster="bg-video-poster.jpg" style="background:#000">
+  <source src="bg-video.mp4#t=0.1" type="video/mp4" />
 </video>
 <!-- SCROLL CONTENT -->
 <section id="scene">
@@ -159,16 +160,15 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
       <div id="parchment"><div class="pad">
         <h2>Hey Ifrah,</h2>
         <p>The last time we met...</p>
-        <!-- etc... -->
+        <!-- all your scroll text/images/videos here -->
       </div></div>
     </div>
     <div id="scrollBottom"></div>
   </div>
 </section>
 <script>
-// --- DYNAMIC HEIGHT PATCH FOR SAFARI & MOBILE ---
+// Patch viewport units dynamically (iOS-safe)
 function setParchmentHeight() {
-  // Use 78% of the viewport, capped at 1080px, fixes iOS viewport bugs
   var vh = Math.max(window.innerHeight, document.documentElement.clientHeight);
   document.documentElement.style.setProperty('--sheetH', Math.min(vh * 0.78, 1080) + 'px');
 }
@@ -189,13 +189,16 @@ setParchmentHeight();
   const h2=parchment.querySelector('h2');
   const paras=parchment.querySelectorAll('p');
 
-  // Utility: ensure videos are ready for iOS
+  // Ensure videos are primed for autoplay on iOS (invoke on user gesture)
   function unlockVideosForiOS() {
-    // Trigger play/pause on user gesture
-    [firstVideo, bgVideo].forEach((v)=>{
+    [firstVideo, bgVideo].forEach(v=>{
       v.load();
+      v.currentTime=0;
       try {
-        v.play().then(()=>v.pause()).catch(()=>{});
+        v.play().then(()=>{
+          v.pause();
+          v.currentTime=0;
+        }).catch(()=>{});
       } catch(e){}
     });
   }
@@ -206,24 +209,32 @@ setParchmentHeight();
 
     unlockVideosForiOS();
 
-    // First video must be played on gesture for iOS
-    firstVideo.currentTime=0;
-    firstVideo.play().catch(()=>{});
-    firstVideo.style.opacity='1';
+    // Block scrolling on intro screen
+    document.body.style.overflow = '';
 
-    firstVideo.onended=()=>{
-      blackout.style.opacity='1';
-      setTimeout(()=>{
-        firstVideo.style.opacity='0';
-        firstVideo.pause();
-        blackout.style.opacity='0';
-        bgVideo.currentTime=0;
-        // Required for iOS: play on gesture chain
-        bgVideo.play().catch(()=>{});
-        bgVideo.style.opacity='1';
-        setTimeout(triggerScroll,3000);
-      },2000);
-    };
+    setTimeout(()=>{
+      firstVideo.currentTime=0;
+      firstVideo.play().catch(()=>{});
+      firstVideo.style.opacity='1';
+
+      // Show rods on transition out of first video
+      firstVideo.onended=()=>{
+        blackout.style.opacity='1';
+        setTimeout(()=>{
+          firstVideo.style.opacity='0';
+          firstVideo.pause();
+          blackout.style.opacity='0';
+          bgVideo.currentTime=0;
+          bgVideo.play().catch(()=>{});
+          bgVideo.style.opacity='1';
+          setTimeout(triggerScroll,3000);
+        },2000);
+      };
+      // fallback: if onended isn't triggered (iOS bug), allow tap-to-skip
+      firstVideo.onclick = ()=>{
+        firstVideo.onended && firstVideo.onended();
+      };
+    }, 30);
   }
 
   function triggerScroll(){
@@ -248,6 +259,13 @@ setParchmentHeight();
     const val=(passInput.value||'').trim().toLowerCase();
     if(val==='malik'){err.style.opacity=0;startExperience();}
     else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
+  });
+
+  // Debug: log video errors (optional, remove for prod)
+  [firstVideo, bgVideo].forEach(v=>{
+    v.onerror=function(e){
+      alert('Video error: ' + (e && e.message ? e.message : 'unknown'));
+    }
   });
 })();
 </script>
