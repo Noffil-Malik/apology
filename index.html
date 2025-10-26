@@ -441,5 +441,16 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 })();
 </script>
 
+  <script>
+function setParchmentHeight() {
+  var vh = Math.max(window.innerHeight, document.documentElement.clientHeight);
+  document.documentElement.style.setProperty('--sheetH', Math.min(vh * 0.78, 1080) + 'px');
+}
+// Update height on resize or orientation change
+window.addEventListener('resize', setParchmentHeight);
+window.addEventListener('orientationchange', setParchmentHeight);
+setParchmentHeight();
+</script>
+
 </body>
 </html>
