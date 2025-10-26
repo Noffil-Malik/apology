@@ -127,14 +127,29 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 /* PARCHMENT */
 #parchmentWrap{position:absolute;left:50%;top:calc(var(--rodH)-25px);transform:translateX(-50%);width:var(--sheetW);height:var(--sheetH);}
-#parchment{
-  position:absolute;top:0;left:0;width:100%;height:0;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-x:hidden;
-  border-left:22px solid #dcbc6a;border-right:22px solid #dcbc6a;border-radius:22px;
+#parchment {
+  position:absolute;
+  top:0; left:0;
+  width:100%;
+  height:0;
+  overflow-y:scroll; /* ensures scrollbars always visible */
+  -webkit-overflow-scrolling:touch; /* smooth scroll on iOS */
+  overflow-x:hidden;
+  scroll-behavior:smooth; /* adds smooth motion */
+  border-left:22px solid #dcbc6a;
+  border-right:22px solid #dcbc6a;
+  border-radius:22px;
   background:linear-gradient(to bottom,#fffdf6 0%,#fff7e6 45%,#fbe9bf 100%);
-  box-shadow:0 0 60px 24px rgba(255,230,170,.85),0 0 80px rgba(255,200,120,.4),inset 0 0 22px rgba(255,255,255,.55);
-  color:var(--ink);text-align:left;padding:0 26px;opacity:0;transform-origin:top center;
+  box-shadow:0 0 40px 10px rgba(255,230,170,.75),
+             0 0 60px rgba(255,200,120,.3),
+             inset 0 0 16px rgba(255,255,255,.5);
+  color:var(--ink);
+  text-align:left;
+  padding:0 26px;
+  opacity:0;
+  transform-origin:top center;
 }
+
 .opened #parchment{height:var(--sheetH);overflow-y:auto;}
 #parchment .pad{padding:48px 10px 60px;max-width:min(64ch,92%);margin:0 auto;}
 #parchment h2{text-align:center;font-family:'Playfair Display',serif;font-weight:600;font-size:2rem;color:#5a2b86;text-shadow:0 0 10px rgba(255,230,170,.5);opacity:0;}
