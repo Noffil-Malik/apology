@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cinematic Cloud Transition Scroll</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@300;400;700&display=swap');
+
 :root{
   --gold-1:#fff6cf;
   --gold-2:#f4d56a;
@@ -14,20 +15,14 @@
   --ink:#5a2b86;
   --rodH:60px;
   --sheetW:min(68vw,850px);
-  --sheetH:min(78vh,1080px); /* Default, JS refines on mobile */
+  --sheetH:min(78vh,1080px);
 }
+
 *{box-sizing:border-box;}
-html,body{
-  height:100%;
-  margin:0;
-  font-family:'Merriweather',serif;
-  color:#fff;
-  background:#000;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-body{min-height:100vh;}
+html,body{height:100%;margin:0;font-family:'Merriweather',serif;color:#fff;overflow:hidden;background:#000}
 ::selection{background:rgba(250,224,168,.6)}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
 #intro{
   position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:24px;text-align:center;z-index:10;transition:opacity .8s ease;
@@ -70,7 +65,7 @@ body{min-height:100vh;}
 @keyframes shake{
   0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}
 }
-#intro.hidden{display:none;}
+
 /* === VIDEOS === */
 #firstVideo,#bgVideo{
   position:fixed;top:50%;left:50%;width:100vw;height:100vh;
@@ -81,6 +76,7 @@ body{min-height:100vh;}
 #firstVideo{z-index:5;opacity:0;transition:opacity 1.5s ease;pointer-events:none;}
 #bgVideo{z-index:1;opacity:0;transition:opacity 2s ease;}
 #blackout{position:fixed;inset:0;background:#000;z-index:7;opacity:0;transition:opacity 2s ease;pointer-events:none;}
+
 /* === SCROLL === */
 #scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;perspective:1700px;z-index:3;}
 #scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH)*2 + var(--sheetH));transform-style:preserve-3d;}
@@ -131,6 +127,7 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 </style>
 </head>
 <body>
+
 <section id="intro">
   <div class="gate">
     <h1>A Magical Surprise</h1>
@@ -143,16 +140,15 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
     <div id="error">That didn’t match. Try again.</div>
   </div>
 </section>
-<!-- VIDEOS -->
-<video id="firstVideo" autoplay muted playsinline preload="auto" poster="first-video-poster.jpg" style="background:#000">
-  <source src="first-video.mp4#t=0.1" type="video/mp4" />
-  <!-- fallback image -->
+
+<video id="firstVideo" muted playsinline preload="auto">
+  <source src="first-video.mp4" type="video/mp4" />
 </video>
 <div id="blackout"></div>
-<video id="bgVideo" autoplay muted playsinline preload="auto" poster="bg-video-poster.jpg" style="background:#000">
-  <source src="bg-video.mp4#t=0.1" type="video/mp4" />
+<video id="bgVideo" muted playsinline preload="auto">
+  <source src="bg-video.mp4" type="video/mp4" />
 </video>
-<!-- SCROLL CONTENT -->
+
 <section id="scene">
   <div id="scrollRig">
     <div id="scrollTop"></div>
@@ -160,22 +156,14 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
       <div id="parchment"><div class="pad">
         <h2>Hey Ifrah,</h2>
         <p>The last time we met...</p>
-        <!-- all your scroll text/images/videos here -->
+        <!-- your full scroll text and media go here -->
       </div></div>
     </div>
     <div id="scrollBottom"></div>
   </div>
 </section>
-<script>
-// Patch viewport units dynamically (iOS-safe)
-function setParchmentHeight() {
-  var vh = Math.max(window.innerHeight, document.documentElement.clientHeight);
-  document.documentElement.style.setProperty('--sheetH', Math.min(vh * 0.78, 1080) + 'px');
-}
-window.addEventListener('resize', setParchmentHeight);
-window.addEventListener('orientationchange', setParchmentHeight);
-setParchmentHeight();
 
+<script>
 (function(){
   const intro=document.getElementById('intro');
   const startForm=document.getElementById('startForm');
@@ -189,52 +177,27 @@ setParchmentHeight();
   const h2=parchment.querySelector('h2');
   const paras=parchment.querySelectorAll('p');
 
-  // Ensure videos are primed for autoplay on iOS (invoke on user gesture)
-  function unlockVideosForiOS() {
-    [firstVideo, bgVideo].forEach(v=>{
-      v.load();
-      v.currentTime=0;
-      try {
-        v.play().then(()=>{
-          v.pause();
-          v.currentTime=0;
-        }).catch(()=>{});
-      } catch(e){}
-    });
-  }
-
   function startExperience(){
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
+    firstVideo.play().then(()=>firstVideo.pause());
+    bgVideo.play().then(()=>bgVideo.pause());
+    firstVideo.currentTime=0;
+    firstVideo.play().catch(()=>{});
+    firstVideo.style.opacity='1';
 
-    unlockVideosForiOS();
-
-    // Block scrolling on intro screen
-    document.body.style.overflow = '';
-
-    setTimeout(()=>{
-      firstVideo.currentTime=0;
-      firstVideo.play().catch(()=>{});
-      firstVideo.style.opacity='1';
-
-      // Show rods on transition out of first video
-      firstVideo.onended=()=>{
-        blackout.style.opacity='1';
-        setTimeout(()=>{
-          firstVideo.style.opacity='0';
-          firstVideo.pause();
-          blackout.style.opacity='0';
-          bgVideo.currentTime=0;
-          bgVideo.play().catch(()=>{});
-          bgVideo.style.opacity='1';
-          setTimeout(triggerScroll,3000);
-        },2000);
-      };
-      // fallback: if onended isn't triggered (iOS bug), allow tap-to-skip
-      firstVideo.onclick = ()=>{
-        firstVideo.onended && firstVideo.onended();
-      };
-    }, 30);
+    firstVideo.onended=()=>{
+      blackout.style.opacity='1';
+      setTimeout(()=>{
+        firstVideo.style.opacity='0';
+        firstVideo.pause();
+        blackout.style.opacity='0';
+        bgVideo.currentTime=0;
+        bgVideo.play().catch(()=>{});
+        bgVideo.style.opacity='1';
+        setTimeout(triggerScroll,3000);
+      },2000);
+    };
   }
 
   function triggerScroll(){
@@ -257,14 +220,26 @@ setParchmentHeight();
   startForm.addEventListener('submit',e=>{
     e.preventDefault();
     const val=(passInput.value||'').trim().toLowerCase();
-    if(val==='malik'){err.style.opacity=0;startExperience();}
-    else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
-  });
-
-  // Debug: log video errors (optional, remove for prod)
-  [firstVideo, bgVideo].forEach(v=>{
-    v.onerror=function(e){
-      alert('Video error: ' + (e && e.message ? e.message : 'unknown'));
+    if(val==='malik'){
+      err.style.opacity=0;
+      const tapScreen=document.createElement("div");
+      tapScreen.textContent="Tap to begin";
+      Object.assign(tapScreen.style,{
+        position:"fixed",inset:0,display:"flex",
+        justifyContent:"center",alignItems:"center",
+        background:"rgba(0,0,0,0.85)",color:"#fff",
+        fontSize:"1.5rem",zIndex:999
+      });
+      document.body.appendChild(tapScreen);
+      tapScreen.addEventListener("click",()=>{
+        tapScreen.remove();
+        startExperience();
+      },{once:true});
+    }
+    else{
+      err.style.opacity=1;
+      startForm.classList.add('shake');
+      setTimeout(()=>startForm.classList.remove('shake'),280);
     }
   });
 })();
