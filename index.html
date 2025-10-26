@@ -192,6 +192,34 @@ body.open-scroll {
   overflow: auto !important;
 }
 
+  /* === FINAL SAFARI SCROLL FIX === */
+body, html {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.opened body {
+  overflow-y: auto !important;
+}
+
+#scene {
+  position: relative !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+#parchment {
+  position: relative !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+  touch-action: pan-y !important;
+}
+
+  #parchment p {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
 </style>
 
 </head>
@@ -442,6 +470,12 @@ body.open-scroll {
             setTimeout(()=>{
               rig.classList.add('opened');
               parchment.style.opacity='1';
+
+              document.body.classList.add('opened');
+document.body.style.overflowY = 'auto';
+window.scrollTo(0, 1);
+setTimeout(()=>window.scrollTo(0, 0),200);
+
 
               document.body.classList.add('open-scroll');
 parchment.style.position = 'relative';
