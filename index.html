@@ -363,17 +363,16 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 
 <script>
 (function(){
-  const FIRST_VIDEO_MS=10000;
-  const BLACKOUT_MS=2000;
-  const EXTRA_DELAY_AFTER_BG=3000;
-
   const intro=document.getElementById('intro');
   const startForm=document.getElementById('startForm');
   const passInput=document.getElementById('passInput');
   const err=document.getElementById('error');
+
+  const goldVeil=document.getElementById('goldVeil');
   const firstVideo=document.getElementById('firstVideo');
   const blackout=document.getElementById('blackout');
   const bgVideo=document.getElementById('bgVideo');
+
   const rig=document.getElementById('scrollRig');
   const parchment=document.getElementById('parchment');
   const scrollBottom=document.getElementById('scrollBottom');
@@ -381,55 +380,83 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
   const paras=parchment.querySelectorAll('p');
 
   function startExperience(){
+    // hide intro
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
+
+    // ensure videos reset and muted (Safari autoplay safe)
+    firstVideo.muted = true;
+    bgVideo.muted = true;
+
+    // play first video
+    firstVideo.currentTime = 0;
     firstVideo.style.opacity='1';
     firstVideo.play().catch(()=>{});
+    goldVeil.classList.add('veil-show');
 
-    setTimeout(()=>{
-      blackout.style.opacity='1';
-      setTimeout(()=>{
-        blackout.style.opacity='0';
-        firstVideo.style.opacity='0';
-        bgVideo.style.opacity='1';
-        bgVideo.play().catch(()=>{});
-
-        setTimeout(()=>{
-          rig.classList.add('ready');
-          setTimeout(()=>{
-            rig.classList.add('unrolling');
-            setTimeout(()=>{
-              rig.classList.add('opened');
-              parchment.style.opacity='1';
-              parchment.style.height='var(--sheetH)';
-              parchment.style.overflowY='auto';
-
-              // fade-in text
-              h2.style.animation='fadeIn 1.1s ease forwards';
-              let delay=350;
-              paras.forEach(p=>{
-                p.style.animation=`fadeIn 1.1s ease forwards`;
-                p.style.animationDelay=`${delay}ms`;
-                delay+=250;
-              });
-
-              // scroll indicator logic
-              parchment.addEventListener('scroll',()=>{
-                const nearBottom=parchment.scrollTop+parchment.clientHeight>=parchment.scrollHeight-10;
-                scrollBottom.style.opacity=nearBottom?'1':'0';
-              });
-            },2700);
-          },1700);
-        },EXTRA_DELAY_AFTER_BG);
-      },BLACKOUT_MS);
-    },FIRST_VIDEO_MS);
+    // when first video ends (or after 10s timeout)
+    firstVideo.onended = transitionToBG;
+    setTimeout(transitionToBG, 10500); // fallback in case Safari blocks onended
   }
 
-  startForm.addEventListener('submit',e=>{
+  function transitionToBG(){
+    // prevent multiple triggers
+    firstVideo.onended = null;
+
+    // fade to black
+    blackout.style.opacity='1';
+    setTimeout(()=>{
+      // hide first video, show bg
+      firstVideo.style.opacity='0';
+      blackout.style.opacity='0';
+
+      bgVideo.currentTime = 0;
+      bgVideo.play().catch(()=>{});
+      bgVideo.style.opacity='1';
+
+      // after 3s delay, bring in scroll
+      setTimeout(triggerScroll, 3000);
+    },2000); // 2s blackout
+  }
+
+  function triggerScroll(){
+    rig.classList.add('ready');
+    setTimeout(()=>{
+      rig.classList.add('unrolling');
+      setTimeout(()=>{
+        rig.classList.add('opened');
+        parchment.style.opacity='1';
+        parchment.style.height='var(--sheetH)';
+        parchment.style.overflowY='auto';
+        parchment.style.touchAction='pan-y';
+        h2.style.animation='fadeIn 1100ms ease forwards';
+        let delay=350;
+        paras.forEach(p=>{
+          p.style.animation=`fadeIn 1100ms ease forwards`;
+          p.style.animationDelay=`${delay}ms`;
+          delay+=250;
+        });
+        parchment.addEventListener('scroll',()=>{
+          const nearBottom = parchment.scrollTop + parchment.clientHeight >= parchment.scrollHeight - 10;
+          scrollBottom.style.opacity = nearBottom ? '1' : '0';
+        });
+      },2700);
+    },1700);
+  }
+
+  startForm.addEventListener('submit',(e)=>{
     e.preventDefault();
     const val=(passInput.value||'').trim().toLowerCase();
-    if(val==='malik'){err.style.opacity=0;startExperience();}
-    else{err.style.opacity=1;startForm.classList.add('shake');setTimeout(()=>startForm.classList.remove('shake'),280);}
+    if(val==='malik'){
+      err.style.opacity=0;
+      startExperience();
+    }else{
+      err.style.opacity=1;
+      startForm.classList.add('shake');
+      setTimeout(()=>startForm.classList.remove('shake'),280);
+      passInput.focus();
+      passInput.select();
+    }
   });
 })();
 </script>
