@@ -85,8 +85,39 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 #blackout{position:fixed;inset:0;background:#000;z-index:7;opacity:0;transition:opacity 2s ease;pointer-events:none;}
 
 /* === SCROLL SCENE === */
-#scene{position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;z-index:3;}
-#scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH)*2 + var(--sheetH));}
+#scene{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:10vh;
+  z-index:3;
+}
+
+/* iPhone Safari fix: remove perspective + 3D context in portrait only */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (orientation: portrait) {
+    #scene {
+      perspective:none !important;
+      -webkit-perspective:none !important;
+      overflow:hidden;
+    }
+    #scrollRig {
+      transform-style:flat !important;
+      -webkit-transform-style:flat !important;
+      will-change:auto;
+    }
+    #parchment {
+      overflow-y:scroll !important;
+      -webkit-overflow-scrolling:touch !important;
+      touch-action:pan-y !important;
+    }
+  }
+}
+
+  
+  #scrollRig{position:relative;width:var(--sheetW);margin:0 auto;height:calc(var(--rodH)*2 + var(--sheetH));}
 
 /* RODS */
 #scrollTop,#scrollBottom{
