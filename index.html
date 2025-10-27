@@ -476,5 +476,27 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 })();
 </script>
 
+
+  <script>
+window.addEventListener('load', () => {
+  const p = document.getElementById('parchment');
+  setTimeout(() => {
+    const stats = document.createElement('div');
+    stats.style.position = 'fixed';
+    stats.style.bottom = '10px';
+    stats.style.left = '10px';
+    stats.style.zIndex = '9999';
+    stats.style.background = 'rgba(0,0,0,0.6)';
+    stats.style.color = 'lime';
+    stats.style.fontSize = '14px';
+    stats.style.padding = '8px 10px';
+    stats.style.borderRadius = '8px';
+    stats.innerText = `clientHeight: ${p.clientHeight}, scrollHeight: ${p.scrollHeight}`;
+    document.body.appendChild(stats);
+  }, 6000);
+});
+</script>
+
+  
 </body>
 </html>
