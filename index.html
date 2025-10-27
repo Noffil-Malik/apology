@@ -115,8 +115,18 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 #scrollTop::before{left:-20px;}#scrollTop::after{right:-20px;}#scrollBottom::before{left:-20px;}#scrollBottom::after{right:-20px;}
 
 /* PARCHMENT */
-#parchmentWrap{position:absolute;left:50%;top:calc(var(--rodH)-25px);transform:translateX(-50%);width:var(--sheetW);height:var(--sheetH);}
-#parchment{
+#parchmentWrap{
+  position:absolute;
+  left:50%;
+  top:calc(var(--rodH) - 25px);
+  transform:translateX(-50%);
+  width:var(--sheetW);
+  height:calc(var(--sheetH) + 10px); /* extend slightly to meet bottom rod */
+  overflow:hidden;
+}
+
+  
+  #parchment{
   position:relative;
   width:100%;
   height:var(--sheetH);
