@@ -203,6 +203,13 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+  /* iOS Safari: promote parchment to its own layer once opened */
+#parchment.is-open {
+  -webkit-overflow-scrolling: touch;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
 
 
 
@@ -419,6 +426,34 @@ html, body {
   const h2=parchment.querySelector('h2');
   const paras=parchment.querySelectorAll('p');
 
+
+  // ---- iOS Safari scroll nudge: call after the unroll completes ----
+function forceIOSScrollFix(el){
+  try {
+    // lock current pixel height (prevents iOS from “collapsing” the scroller in portrait)
+    const h = Math.round(el.getBoundingClientRect().height);
+    el.style.height = h + 'px';
+
+    // toggle overflow & momentum scrolling to force a reflow
+    el.style.overflowY = 'hidden';
+    el.style.webkitOverflowScrolling = 'auto';
+    void el.offsetHeight; // force reflow
+
+    el.style.overflowY = 'auto';
+    el.style.webkitOverflowScrolling = 'touch';
+
+    // tiny scroll jiggle to fully wake the scroll engine
+    el.scrollTop = 1;
+    el.scrollTop = 0;
+  } catch(e){}
+}
+
+// re-apply on rotation because iOS changes the viewport height
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => forceIOSScrollFix(document.getElementById('parchment')), 400);
+});
+
+  
   function startExperience(){
     intro.style.opacity='0';
     setTimeout(()=>intro.classList.add('hidden'),800);
@@ -447,6 +482,11 @@ html, body {
               parchment.style.opacity='1';
               parchment.scrollTop=0;
               parchment.focus();
+
+              // iOS: promote to its own layer and fix portrait scrolling
+              parchment.classList.add('is-open');
+              forceIOSScrollFix(parchment);
+
 
               // Fade-in text
               h2.style.animation='fadeIn 1.1s ease forwards';
