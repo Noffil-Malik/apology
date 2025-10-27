@@ -168,18 +168,48 @@ img.mediaFrame{width:auto;max-width:90%;height:auto;}
 #parchment::-webkit-scrollbar-thumb{background:#c9a84f;border-radius:4px;}
 #parchment::-webkit-scrollbar-track{background:rgba(0,0,0,.1);}
 
-  /* --- iPhone Safari Portrait Scroll Fix --- */
+/* ---- iPhone Safari portrait: make parchment scrollable by removing it from 3D/transform tree ---- */
 @supports (-webkit-touch-callout: none) {
   @media screen and (orientation: portrait) {
+    /* Lift the wrapper out of the transformed context and fix it to the viewport */
+    #parchmentWrap {
+      position: fixed !important;
+      top: calc(var(--rodH) - 25px) !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: var(--sheetW) !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+
+      /* Critical: no transforms on the wrapper in portrait iOS */
+      transform: none !important;
+      -webkit-transform: none !important;
+
+      /* Give it a strict viewport-based height so the inner can scroll */
+      height: 78vh !important;
+      max-height: 78vh !important;
+
+      /* Keeps this above the background/video but under the top rod visuals */
+      z-index: 6;
+      /* Small perf hint; also prevents weird reflow interactions */
+      contain: layout paint size style;
+    }
+
+    /* The actual scroll container: full height of the wrapper, momentum scrolling on iOS */
     #parchment {
-      position: relative;
+      position: relative !important;
+      height: 100% !important;
+      max-height: 100% !important;
       overflow-y: scroll !important;
       -webkit-overflow-scrolling: touch !important;
-      height: 78vh !important;       /* fixes the shrink in portrait */
-      max-height: 78vh !important;
+      touch-action: pan-y !important;
+      /* No transforms here either */
+      transform: none !important;
+      -webkit-transform: none !important;
     }
   }
 }
+
 
 
 
